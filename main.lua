@@ -20,9 +20,15 @@ function love.load()
     Pieces = {}
     TestMessage = "Nothing till now"
     TileOffset = 32
+    Turn = true
 end
 
 function love.update(dt)
+end
+
+function roundUp(numToRound, multiple)
+    mod = ((numToRound % multiple) + multiple) % multiple
+    return numToRound - mod
 end
 
 function love.mousepressed(x,y,btn)
@@ -30,7 +36,16 @@ function love.mousepressed(x,y,btn)
     xRelativePos = math.abs(math.floor(x/TileOffset) - x/TileOffset)
     yRelativePos = math.abs(math.floor(y/TileOffset) - y/TileOffset)
     if((xRelativePos < 0.15) and (yRelativePos < 0.15)) then
-        local localPiece = {BlackPiece, x - 12, y - 12}
+        newX = roundUp(x,32)
+        newY = roundUp(y,32)
+        if(Turn) then
+            localPiece = {BlackPiece, newX-12, newY-12}
+            Turn = not Turn
+        else
+            localPiece = {WhitePiece, newX-12, newY-12}
+            Turn = not Turn
+        end
+        --local localPiece = {BlackPiece, x - 12, y - 12}
         table.insert(Pieces, localPiece)
     end
 end
