@@ -21,7 +21,8 @@ function love.load()
     ComputerPieces = {}
     TestMessage = "Nothing till now"
     TileOffset = 32
-    Turn = true
+    PlayerTurn = true
+    ComputerTurn = false
 end
 
 function won(gamePieces)
@@ -65,6 +66,10 @@ function diagonalNeighbours(piece, gamePieces, count)
 end
 
 function love.update(dt)
+    if(ComputerTurn) then
+        ComputerTurn = not ComputerTurn
+        ai()
+    end
 end
 
 function roundUp(numToRound, multiple)
@@ -93,24 +98,26 @@ function love.mousepressed(x,y,btn)
     if((xRelativePos < 0.15) and (yRelativePos < 0.15)) then
         newX = roundUp(x,32)
         newY = roundUp(y,32)
-        if(Turn) then
+        if(PlayerTurn) then
             localPiece = {BlackPiece, newX-12, newY-12}
             if(not positionTaken(localPiece)) then
+                PlayerTurn = not PlayerTurn
                 table.insert(PlayerPieces, localPiece)
                 if(won(PlayerPieces)) then
                     print("player won")
+                else
+                    ComputerTurn = true
                 end
-                Turn = not Turn
             end
-        else
-            localPiece = {WhitePiece, newX-12, newY-12}
-            if(not positionTaken(localPiece)) then
-                table.insert(ComputerPieces, localPiece)
-                if(won(ComputerPieces)) then
-                    print("Computer Won")
-                end
-                Turn = not Turn
-            end
+--        else
+--            localPiece = {WhitePiece, newX-12, newY-12}
+--            if(not positionTaken(localPiece)) then
+--                table.insert(ComputerPieces, localPiece)
+--                if(won(ComputerPieces)) then
+--                    print("Computer Won")
+--                end
+--                Turn = not Turn
+--            end
         end
     end
 end
@@ -138,4 +145,21 @@ function love.draw(dt)
         love.graphics.draw(piece[1],Piece,piece[2],piece[3])
     end
     love.graphics.print(TestMessage, 485,1)
+end
+
+function ai()
+    x = math.random(15)
+    y = math.random(15)
+    localPiece = {WhitePiece, (x*32)-12,(y*32)-12}
+    while positionTaken(localPiece) do
+        x = math.random(15)
+        y = math.random(15)
+        localPiece = {WhitePiece, (x*32)-12,(y*32)-12}
+    end
+    table.insert(ComputerPieces, localPiece)
+    if(won(ComputerPieces)) then
+        print("computer won")
+    else
+        PlayerTurn = true
+    end
 end
