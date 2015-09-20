@@ -17,10 +17,51 @@ function love.load()
     Piece = love.graphics.newQuad(0, 0, 24, 24, 24,24)
 
     --Data Structs that will be used
-    Pieces = {}
+    PlayerPieces = {}
+    ComputerPieces = {}
     TestMessage = "Nothing till now"
     TileOffset = 32
     Turn = true
+end
+
+function won(gamePieces)
+    for _, piece in pairs(gamePieces) do
+        neigV = (verticalNeighbours(piece,gamePieces,0) == 4)
+        neigH = (horizontalNeighbours(piece,gamePieces,0) == 4)
+        neigD = (diagonalNeighbours(piece,gamePieces,0) == 4)
+        --print("v "..neigV.." h "..neigH.." d "..neigD)
+        if(neigV or neigH or neigD) then
+            return true
+        end
+    end
+    return false
+end
+
+function verticalNeighbours(piece, gamePieces, count)
+    for _, nPiece in pairs(gamePieces) do
+        if((nPiece[2] == piece[2]) and (nPiece[3] == piece[3]+32)) then
+            return verticalNeighbours(nPiece, gamePieces, count+1)
+        end
+    end
+    return count
+end
+
+function horizontalNeighbours(piece, gamePieces, count)
+    for _, nPiece in pairs(gamePieces) do
+        if((nPiece[2] == piece[2]+32) and (nPiece[3] == piece[3])) then
+            return verticalNeighbours(nPiece, gamePieces, count+1)
+        end
+    end
+    return count
+end
+
+function diagonalNeighbours(piece, gamePieces, count)
+    for _, nPiece in pairs(gamePieces) do
+        if((nPiece[2] == piece[2]+32) and (nPiece[3] == piece[3]+32)) then
+            return verticalNeighbours(nPiece, gamePieces, count+1)
+        end
+    end
+    return count
 end
 
 function love.update(dt)
@@ -32,7 +73,12 @@ function roundUp(numToRound, multiple)
 end
 
 function positionTaken(piece)
-    for _, gamePiece in pairs(Pieces) do
+    for _, gamePiece in pairs(PlayerPieces) do
+        if((piece[2] == gamePiece[2]) and (piece[3] == gamePiece[3])) then
+            return true
+        end
+    end
+    for _, gamePiece in pairs(ComputerPieces) do
         if((piece[2] == gamePiece[2]) and (piece[3] == gamePiece[3])) then
             return true
         end
@@ -49,13 +95,22 @@ function love.mousepressed(x,y,btn)
         newY = roundUp(y,32)
         if(Turn) then
             localPiece = {BlackPiece, newX-12, newY-12}
+            if(not positionTaken(localPiece)) then
+                table.insert(PlayerPieces, localPiece)
+                if(won(PlayerPieces)) then
+                    print("player won")
+                end
+                Turn = not Turn
+            end
         else
             localPiece = {WhitePiece, newX-12, newY-12}
-        end
-        --local localPiece = {BlackPiece, x - 12, y - 12}
-        if(not positionTaken(localPiece)) then
-            table.insert(Pieces, localPiece)
-            Turn = not Turn
+            if(not positionTaken(localPiece)) then
+                table.insert(ComputerPieces, localPiece)
+                if(won(ComputerPieces)) then
+                    print("Computer Won")
+                end
+                Turn = not Turn
+            end
         end
     end
 end
@@ -76,10 +131,11 @@ function love.draw(dt)
             end
         end
     end
-    for key,piece in pairs(Pieces) do
+    for _,piece in pairs(PlayerPieces) do
         love.graphics.draw(piece[1],Piece,piece[2],piece[3])
     end
-    --love.graphics.draw(BlackPiece,Piece,20,20)
-    love.graphics.draw(WhitePiece,Piece,52,52)
+    for _,piece in pairs(ComputerPieces) do
+        love.graphics.draw(piece[1],Piece,piece[2],piece[3])
+    end
     love.graphics.print(TestMessage, 485,1)
 end
