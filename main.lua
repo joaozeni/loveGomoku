@@ -31,6 +31,15 @@ function roundUp(numToRound, multiple)
     return numToRound - mod
 end
 
+function positionTaken(piece)
+    for _, gamePiece in pairs(Pieces) do
+        if((piece[2] == gamePiece[2]) and (piece[3] == gamePiece[3])) then
+            return true
+        end
+    end
+    return false
+end
+
 function love.mousepressed(x,y,btn)
     TestMessage = "Pressed X:" .. x .. " Y: " .. y
     xRelativePos = math.abs(math.floor(x/TileOffset) - x/TileOffset)
@@ -40,13 +49,14 @@ function love.mousepressed(x,y,btn)
         newY = roundUp(y,32)
         if(Turn) then
             localPiece = {BlackPiece, newX-12, newY-12}
-            Turn = not Turn
         else
             localPiece = {WhitePiece, newX-12, newY-12}
-            Turn = not Turn
         end
         --local localPiece = {BlackPiece, x - 12, y - 12}
-        table.insert(Pieces, localPiece)
+        if(not positionTaken(localPiece)) then
+            table.insert(Pieces, localPiece)
+            Turn = not Turn
+        end
     end
 end
 
