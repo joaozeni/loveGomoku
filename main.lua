@@ -30,7 +30,6 @@ function won(gamePieces)
         neigV = (verticalNeighbours(piece,gamePieces,0) == 4)
         neigH = (horizontalNeighbours(piece,gamePieces,0) == 4)
         neigD = (diagonalNeighbours(piece,gamePieces,0) == 4)
-        --print("v "..neigV.." h "..neigH.." d "..neigD)
         if(neigV or neigH or neigD) then
             return true
         end
@@ -68,7 +67,9 @@ end
 function love.update(dt)
     if(ComputerTurn) then
         ComputerTurn = not ComputerTurn
-        ai()
+        local depth = mmab({PlayerPieces,ComputerPieces}, 0, 13, 2, true)
+        print(depth[2])
+        --ai()
     end
 end
 
@@ -77,13 +78,13 @@ function roundUp(numToRound, multiple)
     return numToRound - mod
 end
 
-function positionTaken(piece)
-    for _, gamePiece in pairs(PlayerPieces) do
+function positionTaken(piece, gameState)
+    for _, gamePiece in pairs(gameState[1]) do
         if((piece[2] == gamePiece[2]) and (piece[3] == gamePiece[3])) then
             return true
         end
     end
-    for _, gamePiece in pairs(ComputerPieces) do
+    for _, gamePiece in pairs(gameState[2]) do
         if((piece[2] == gamePiece[2]) and (piece[3] == gamePiece[3])) then
             return true
         end
@@ -100,7 +101,7 @@ function love.mousepressed(x,y,btn)
         newY = roundUp(y,32)
         if(PlayerTurn) then
             localPiece = {BlackPiece, newX-12, newY-12}
-            if(not positionTaken(localPiece)) then
+            if(not positionTaken(localPiece,{PlayerPieces,ComputerPieces})) then
                 PlayerTurn = not PlayerTurn
                 table.insert(PlayerPieces, localPiece)
                 if(won(PlayerPieces)) then
@@ -109,15 +110,6 @@ function love.mousepressed(x,y,btn)
                     ComputerTurn = true
                 end
             end
---        else
---            localPiece = {WhitePiece, newX-12, newY-12}
---            if(not positionTaken(localPiece)) then
---                table.insert(ComputerPieces, localPiece)
---                if(won(ComputerPieces)) then
---                    print("Computer Won")
---                end
---                Turn = not Turn
---            end
         end
     end
 end
@@ -147,19 +139,69 @@ function love.draw(dt)
     love.graphics.print(TestMessage, 485,1)
 end
 
-function ai()
-    x = math.random(15)
-    y = math.random(15)
-    localPiece = {WhitePiece, (x*32)-12,(y*32)-12}
-    while positionTaken(localPiece) do
-        x = math.random(15)
-        y = math.random(15)
-        localPiece = {WhitePiece, (x*32)-12,(y*32)-12}
+
+-- Game AI
+function mmab(gameState, depth, min, max, maximize)
+    if(won(gameState[1]) or won(gameState[2]) or depth > 2) then --Leaf
+        if(won(gameState[1]) or won(gameState[2])) then
+            print("here ")
+        end
+        return {evaluate(gameState),depth}
     end
-    table.insert(ComputerPieces, localPiece)
-    if(won(ComputerPieces)) then
-        print("computer won")
+    moves = getEmpties(gameState)
+    if(maximize) then
+        val = min
+        for _, move in pairs(moves) do
+            local childGameState = {gameState[1],gameState[2]}
+            table.insert(childGameState[2],{WhitePiece,move[2],move[3]})
+            val = math.max(val,mmab(gameState,depth+1,val,max,false)[1])
+            table.remove(childGameState[2])
+            if val > max then 
+                print("max cut")
+                return {max,depth} 
+            end
+        end
+        return {val,depth}
     else
-        PlayerTurn = true
+        val = max
+        for _, move in pairs(moves) do
+            local childGameState = {gameState[1],gameState[2]}
+            table.insert(childGameState[1],{BlackPiece,move[2],move[3]})
+            local val = math.min(val,mmab(gameState,depth+1,min,val,true)[1])
+            table.remove(childGameState[1])
+            if val < min then 
+                print("mix cut")
+                return {min, depth}
+            end
+        end
+        return {val,depth}
     end
+end
+
+    --x = math.random(15)
+    --y = math.random(15)
+    --localPiece = {WhitePiece, (x*32)-12,(y*32)-12}
+    --while positionTaken(localPiece,{PlayerPieces,ComputerPieces}) do
+    --    x = math.random(15)
+    --    y = math.random(15)
+    --    localPiece = {WhitePiece, (x*32)-12,(y*32)-12}
+    --end
+
+function getEmpties(gameState)
+    moves = {}
+    for x=0,14 do
+        for y=0,14 do
+            localPiece = {_, (x*32)-12, (y*32)-12}
+            if(not positionTaken(localPiece,gameState)) then
+                table.insert(moves,localPiece)
+            end
+        end
+    end
+    return moves
+end
+
+function evaluate(gameState)
+    rnd = math.random(15)
+    --print(rnd)
+    return rnd
 end
