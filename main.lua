@@ -67,8 +67,10 @@ end
 function love.update(dt)
     if(ComputerTurn) then
         ComputerTurn = not ComputerTurn
-        local depth = mmab({PlayerPieces,ComputerPieces}, 0, 13, 2, true)
-        print(depth[2])
+        local mmabResult = mmab({PlayerPieces,ComputerPieces}, 0, -10000, 10000, true)
+        table.insert(ComputerPieces, {WhitePiece, mmabResult[2][2], mmabResult[2][3]})
+        print(mmabResult[3])
+        PlayerTurn = true
         --ai()
     end
 end
@@ -142,50 +144,55 @@ end
 
 -- Game AI
 function mmab(gameState, depth, min, max, maximize)
-    if(won(gameState[1]) or won(gameState[2]) or depth > 2) then --Leaf
+    if(won(gameState[1]) or won(gameState[2]) or depth > 20) then --Leaf
         if(won(gameState[1]) or won(gameState[2])) then
             print("here ")
         end
-        return {evaluate(gameState),depth}
+        return {evaluate(gameState,maximize), _, depth}
     end
     moves = getEmpties(gameState)
     if(maximize) then
-        val = min
+        local val = min
         for _, move in pairs(moves) do
             local childGameState = {gameState[1],gameState[2]}
             table.insert(childGameState[2],{WhitePiece,move[2],move[3]})
-            val = math.max(val,mmab(gameState,depth+1,val,max,false)[1])
+            local eval = mmab(gameState,depth+1,val,max,false)
+            if(depth < eval[3]) then
+                depth = eval[3]
+            end
+            if(val < eval[1]) then
+                val = eval[1]
+                bestMove = move
+            end
             table.remove(childGameState[2])
             if val > max then 
                 print("max cut")
-                return {max,depth} 
+                return {max, bestMove,depth} 
             end
         end
-        return {val,depth}
+        return {val,bestMove,depth}
     else
-        val = max
+        local val = max
         for _, move in pairs(moves) do
             local childGameState = {gameState[1],gameState[2]}
             table.insert(childGameState[1],{BlackPiece,move[2],move[3]})
-            local val = math.min(val,mmab(gameState,depth+1,min,val,true)[1])
+            local eval = mmab(gameState,depth+1,min,val,true)
+            if(depth < eval[3]) then
+                depth = eval[3]
+            end
+            if(val > eval[1]) then
+                val = eval[1]
+                bestMove = move
+            end
             table.remove(childGameState[1])
             if val < min then 
                 print("mix cut")
-                return {min, depth}
+                return {min, bestMove,depth}
             end
         end
-        return {val,depth}
+        return {val,bestMove,depth}
     end
 end
-
-    --x = math.random(15)
-    --y = math.random(15)
-    --localPiece = {WhitePiece, (x*32)-12,(y*32)-12}
-    --while positionTaken(localPiece,{PlayerPieces,ComputerPieces}) do
-    --    x = math.random(15)
-    --    y = math.random(15)
-    --    localPiece = {WhitePiece, (x*32)-12,(y*32)-12}
-    --end
 
 function getEmpties(gameState)
     moves = {}
@@ -200,8 +207,47 @@ function getEmpties(gameState)
     return moves
 end
 
-function evaluate(gameState)
-    rnd = math.random(15)
+
+
+function evaluate(gameState, maximize)
+    oneWay = 0
+    twoWay = 0
+    threeWay = 0
+    if maximize then
+        gamePieces = gameState[1]
+    else
+        gamePieces = gameState[2]
+    end
+    for _, piece in pairs(gamePieces) do
+        neigV = verticalNeighbours(piece,gamePieces,0)
+        neigH = horizontalNeighbours(piece,gamePieces,0)
+        neigD = diagonalNeighbours(piece,gamePieces,0)
+        if neigV == 4 then
+            oneWay = oneWay + 1
+        elseif neigV == 3 then
+            twoWay = twoWay + 1
+        elseif neigV == 2 then
+            threeWay = threeWay + 1
+        end
+
+        if neigH == 4 then
+            oneWay = oneWay + 1
+        elseif neigH == 3 then
+            twoWay = twoWay + 1
+        elseif neigH == 2 then
+            threeWay = threeWay + 1
+        end
+
+        if neigD == 4 then
+            oneWay = oneWay + 1
+        elseif neigD == 3 then
+            twoWay = twoWay + 1
+        elseif neigD == 2 then
+            threeWay = threeWay + 1
+        end
+    end
+    evaluation = oneWay * 100.0 + twoWay * 5.0 + threeWay * 1.0
+    --print(evaluation)
     --print(rnd)
-    return rnd
+    return evaluation
 end
