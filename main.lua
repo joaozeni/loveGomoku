@@ -4,6 +4,7 @@ function love.load()
     DotTiles = love.graphics.newImage('assets/dotTiles.png')
     BlackPiece = love.graphics.newImage('assets/blackPiece.png')
     WhitePiece = love.graphics.newImage('assets/whitePiece.png')
+    Board = love.graphics.newImage('assets/board.png')
     
     --Creating Quads
     local tileW, tileH = 32,32
@@ -117,21 +118,22 @@ function love.mousepressed(x,y,btn)
 end
 
 function love.draw(dt)
-    for i=0,14 do
-        for j=0,14 do
-            if((i==2 and j==2)or(i==2 and j==11)or(i==11 and j==2)or(i==11 and j==11)or( i==7 and j==7)) then
-                love.graphics.draw(DotTiles,UpLeftTile, i*TileOffset, j*TileOffset)
-            elseif((i==3 and j==2)or(i==3 and j==11)or(i==12 and j==2)or(i==12 and j==11)or( i==8 and j==7)) then
-                love.graphics.draw(DotTiles,UpRightTile, i*TileOffset, j*TileOffset)
-            elseif((i==2 and j==3)or(i==2 and j==12)or(i==11 and j==3)or(i==11 and j==12)or( i==7 and j==8)) then
-                love.graphics.draw(DotTiles,DownLeftTile, i*TileOffset, j*TileOffset)
-            elseif((i==3 and j==3)or(i==3 and j==12)or(i==12 and j==3)or(i==12 and j==12)or( i==8 and j==8)) then
-                love.graphics.draw(DotTiles,DownRightTile, i*TileOffset, j*TileOffset)
-            else
-                love.graphics.draw(BlankTileImg,BlankTile, i*TileOffset, j*TileOffset)
-            end
-        end
-    end
+  love.graphics.draw(Board,0,0,0,0.5)
+--    for i=0,14 do
+--        for j=0,14 do
+--            if((i==2 and j==2)or(i==2 and j==11)or(i==11 and j==2)or(i==11 and j==11)or( i==7 and j==7)) then
+--                love.graphics.draw(DotTiles,UpLeftTile, i*TileOffset, j*TileOffset)
+--            elseif((i==3 and j==2)or(i==3 and j==11)or(i==12 and j==2)or(i==12 and j==11)or( i==8 and j==7)) then
+--                love.graphics.draw(DotTiles,UpRightTile, i*TileOffset, j*TileOffset)
+--            elseif((i==2 and j==3)or(i==2 and j==12)or(i==11 and j==3)or(i==11 and j==12)or( i==7 and j==8)) then
+--                love.graphics.draw(DotTiles,DownLeftTile, i*TileOffset, j*TileOffset)
+--            elseif((i==3 and j==3)or(i==3 and j==12)or(i==12 and j==3)or(i==12 and j==12)or( i==8 and j==8)) then
+--                love.graphics.draw(DotTiles,DownRightTile, i*TileOffset, j*TileOffset)
+--            else
+--                love.graphics.draw(BlankTileImg,BlankTile, i*TileOffset, j*TileOffset)
+--            end
+--        end
+--    end
     for _,piece in pairs(PlayerPieces) do
         love.graphics.draw(piece[1],Piece,piece[2],piece[3])
     end
