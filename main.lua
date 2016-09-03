@@ -118,7 +118,7 @@ function love.mousepressed(x,y,btn)
 end
 
 function love.draw(dt)
-  love.graphics.draw(Board,0,0,0,0.5)
+  love.graphics.draw(Board,0,0,0,0.25)
 --    for i=0,14 do
 --        for j=0,14 do
 --            if((i==2 and j==2)or(i==2 and j==11)or(i==11 and j==2)or(i==11 and j==11)or( i==7 and j==7)) then
