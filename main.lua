@@ -22,6 +22,7 @@ function love.load()
     ComputerPieces = {}
     TestMessage = "Nothing till now"
     TileOffset = 32
+    BoardOffset = 16
     PlayerTurn = true
     ComputerTurn = false
 end
@@ -97,11 +98,11 @@ end
 
 function love.mousepressed(x,y,btn)
     TestMessage = "Pressed X:" .. x .. " Y: " .. y
-    xRelativePos = math.abs(math.floor(x/TileOffset) - x/TileOffset)
-    yRelativePos = math.abs(math.floor(y/TileOffset) - y/TileOffset)
-    if((xRelativePos < 0.15) and (yRelativePos < 0.15)) then
-        newX = roundUp(x,32)
-        newY = roundUp(y,32)
+    xRelativePos = math.abs(math.floor((x-BoardOffset)/TileOffset) - (x-BoardOffset)/TileOffset)
+    yRelativePos = math.abs(math.floor((y-BoardOffset)/TileOffset) - (y-BoardOffset)/TileOffset)
+    if((xRelativePos < 0.5) and (yRelativePos < 0.5)) then
+        newX = roundUp(x,32) + BoardOffset
+        newY = roundUp(y,32) + BoardOffset
         if(PlayerTurn) then
             localPiece = {BlackPiece, newX-12, newY-12}
             if(not positionTaken(localPiece,{PlayerPieces,ComputerPieces})) then
@@ -140,7 +141,7 @@ function love.draw(dt)
     for _,piece in pairs(ComputerPieces) do
         love.graphics.draw(piece[1],Piece,piece[2],piece[3])
     end
-    love.graphics.print(TestMessage, 485,1)
+    love.graphics.print(TestMessage, 512,1)
 end
 
 
@@ -200,7 +201,7 @@ function getEmpties(gameState)
     moves = {}
     for x=0,14 do
         for y=0,14 do
-            localPiece = {_, (x*32)-12, (y*32)-12}
+            localPiece = {_, (x*32)-12+BoardOffset, (y*32)-12+BoardOffset}
             if(not positionTaken(localPiece,gameState)) then
                 table.insert(moves,localPiece)
             end
@@ -208,8 +209,6 @@ function getEmpties(gameState)
     end
     return moves
 end
-
-
 
 function evaluate(gameState, maximize)
     oneWay = 0
