@@ -1,25 +1,22 @@
 function love.load()
     --Geting Imgs
-    BlankTileImg = love.graphics.newImage('assets/blanckTile.png')
-    DotTiles = love.graphics.newImage('assets/dotTiles.png')
     BlackPiece = love.graphics.newImage('assets/blackPiece.png')
     WhitePiece = love.graphics.newImage('assets/whitePiece.png')
     Board = love.graphics.newImage('assets/board.png')
     
     --Creating Quads
-    local tileW, tileH = 32,32
-    local dotTilesW, dotTilesH = DotTiles:getWidth(), DotTiles:getHeight()
-
-    BlankTile = love.graphics.newQuad(0,  0, tileW, tileH, 32, 32)
-    UpLeftTile = love.graphics.newQuad(0,  0, tileW, tileH, dotTilesW, dotTilesH)
-    UpRightTile = love.graphics.newQuad(32,  0, tileW, tileH, dotTilesW, dotTilesH)
-    DownLeftTile = love.graphics.newQuad(0,  32, tileW, tileH, dotTilesW, dotTilesH)
-    DownRightTile = love.graphics.newQuad(32,  32, tileW, tileH, dotTilesW, dotTilesH)
     Piece = love.graphics.newQuad(0, 0, 24, 24, 24,24)
 
     --Data Structs that will be used
-    PlayerPieces = {}
-    ComputerPieces = {}
+    --PlayerPieces = {}
+    --ComputerPieces = {}
+    Pieces = {}
+    for i=0,14 do
+      Pieces[i] = {}
+      for j=0,14 do
+	Pieces[i][j] = {}
+      end
+    end
     TestMessage = "Nothing till now"
     TileOffset = 32
     BoardOffset = 16
@@ -27,50 +24,106 @@ function love.load()
     ComputerTurn = false
 end
 
-function won(gamePieces)
-    for _, piece in pairs(gamePieces) do
-        neigV = (verticalNeighbours(piece,gamePieces,0) == 4)
-        neigH = (horizontalNeighbours(piece,gamePieces,0) == 4)
-        neigD = (diagonalNeighbours(piece,gamePieces,0) == 4)
-        if(neigV or neigH or neigD) then
-            return true
-        end
+function won(playerColorPiece)
+    for i=0,14 do
+      for j=0,14 do
+	if Pieces[i][j][1] == playerColorPiece then
+	  x = (Pieces[i][j][2] - BoardOffset + 12)/32
+	  y = (Pieces[i][j][3] - BoardOffset + 12)/32
+	  currentPiece = {Pieces[i][j][1], x, y}
+	  neigV = (verticalNeighbours(currentPiece) == 4)
+	  neigH = (horizontalNeighbours(currentPiece) == 4)
+	  neigD = (diagonalNeighbours(currentPiece) == 4)
+	  if(neigV or neigH or neigD) then
+	    return true
+	  end
+	end
+      end
     end
     return false
 end
 
-function verticalNeighbours(piece, gamePieces, count)
-    for _, nPiece in pairs(gamePieces) do
-        if((nPiece[2] == piece[2]) and (nPiece[3] == piece[3]+32)) then
-            return verticalNeighbours(nPiece, gamePieces, count+1)
-        end
+function verticalNeighbours(piece)
+    countUp = 0
+    countDown = 0
+    print("x"..piece[2])
+    for i=1,4 do
+      if piece[3]+i < 16 then
+	if Pieces[piece[2]][piece[3]+i][1] == piece[1] then
+	  countUp = countUp + 1
+	else
+	  break
+	end
+      end
     end
-    return count
+    for i=-1,-4,-1 do
+      if piece[3]+i > 0 then
+	if Pieces[piece[2]][piece[3]+i][1] == piece[1] then
+	  countDown = countDown + 1
+	else
+	  break
+	end
+      end
+    end
+    return countUp + countDown
 end
 
-function horizontalNeighbours(piece, gamePieces, count)
-    for _, nPiece in pairs(gamePieces) do
-        if((nPiece[2] == piece[2]+32) and (nPiece[3] == piece[3])) then
-            return verticalNeighbours(nPiece, gamePieces, count+1)
-        end
+function horizontalNeighbours(piece)
+    countUp = 0
+    countDown = 0
+    for i=1,4 do
+      if piece[2]+i < 16 then
+	if Pieces[piece[2]+i][piece[3]][1] == piece[1] then
+	  countUp = countUp + 1
+	else
+	  break
+	end
+      end
     end
-    return count
+    for i=-1,-4,-1 do
+      if piece[2]+i > 0 then
+	if Pieces[piece[2]+i][piece[3]][1] == piece[1] then
+	  countDown = countDown + 1
+	else
+	  break
+	end
+      end
+    end
+    return countUp + countDown
 end
 
-function diagonalNeighbours(piece, gamePieces, count)
-    for _, nPiece in pairs(gamePieces) do
-        if((nPiece[2] == piece[2]+32) and (nPiece[3] == piece[3]+32)) then
-            return verticalNeighbours(nPiece, gamePieces, count+1)
-        end
+function diagonalNeighbours(piece)
+    countUp = 0
+    countDown = 0
+    for i=1,4 do
+      if piece[2]+i < 16 and piece[3]+i < 16 then
+	if Pieces[piece[2]+i][piece[3]+i][1] == piece[1] then
+	  countUp = countUp + 1
+	else
+	  break
+	end
+      end
     end
-    return count
+    for i=-1,-4,-1 do
+      if piece[2]+i > 0 and piece[3]+i > 0 then
+	if Pieces[piece[2]+i][piece[3]+i][1] == piece[1] then
+	  countDown = countDown + 1
+	else
+	  break
+	end
+      end
+    end
+    return countUp + countDown
 end
 
 function love.update(dt)
     if(ComputerTurn) then
         ComputerTurn = not ComputerTurn
         local mmabResult = mmab({PlayerPieces,ComputerPieces}, 0, -10000, 10000, true)
-        table.insert(ComputerPieces, {WhitePiece, mmabResult[2][2], mmabResult[2][3]})
+	x = (mmabResult[2][2] - BoardOffset + 12)/32
+	y = (mmabResult[2][3] - BoardOffset + 12)/32
+	Pieces[x][y] = {WhitePiece, mmabResult[2][2], mmabResult[2][3]}
+        --table.insert(ComputerPieces, {WhitePiece, mmabResult[2][2], mmabResult[2][3]})
         print(mmabResult[3])
         PlayerTurn = true
         --ai()
@@ -82,22 +135,14 @@ function roundUp(numToRound, multiple)
     return numToRound - mod
 end
 
-function positionTaken(piece, gameState)
-    for _, gamePiece in pairs(gameState[1]) do
-        if((piece[2] == gamePiece[2]) and (piece[3] == gamePiece[3])) then
-            return true
-        end
-    end
-    for _, gamePiece in pairs(gameState[2]) do
-        if((piece[2] == gamePiece[2]) and (piece[3] == gamePiece[3])) then
-            return true
-        end
-    end
-    return false
+function positionTaken(piece)
+  x = (piece[2] - BoardOffset + 12)/32
+  y = (piece[3] - BoardOffset + 12)/32
+  return Pieces[x][y][1] ~= nil
 end
 
 function love.mousepressed(x,y,btn)
-    TestMessage = "Pressed X:" .. x .. " Y: " .. y
+    --TestMessage = "Pressed X:" .. x .. " Y: " .. y
     xRelativePos = math.abs(math.floor((x-BoardOffset)/TileOffset) - (x-BoardOffset)/TileOffset)
     yRelativePos = math.abs(math.floor((y-BoardOffset)/TileOffset) - (y-BoardOffset)/TileOffset)
     if((xRelativePos < 0.5) and (yRelativePos < 0.5)) then
@@ -105,13 +150,16 @@ function love.mousepressed(x,y,btn)
         newY = roundUp(y,32) + BoardOffset
         if(PlayerTurn) then
             localPiece = {BlackPiece, newX-12, newY-12}
-            if(not positionTaken(localPiece,{PlayerPieces,ComputerPieces})) then
-                PlayerTurn = not PlayerTurn
-                table.insert(PlayerPieces, localPiece)
-                if(won(PlayerPieces)) then
+            if(not positionTaken(localPiece)) then
+                --PlayerTurn = not PlayerTurn
+	        x = (localPiece[2] - BoardOffset + 12)/32
+	        y = (localPiece[3] - BoardOffset + 12)/32
+		Pieces[x][y] = localPiece
+                --table.insert(PlayerPieces, localPiece)
+                if(won(BlackPiece)) then
                     print("player won")
-                else
-                    ComputerTurn = true
+                --else
+                    ComputerTurn = false
                 end
             end
         end
@@ -120,30 +168,15 @@ end
 
 function love.draw(dt)
   love.graphics.draw(Board,0,0,0,0.25)
---    for i=0,14 do
---        for j=0,14 do
---            if((i==2 and j==2)or(i==2 and j==11)or(i==11 and j==2)or(i==11 and j==11)or( i==7 and j==7)) then
---                love.graphics.draw(DotTiles,UpLeftTile, i*TileOffset, j*TileOffset)
---            elseif((i==3 and j==2)or(i==3 and j==11)or(i==12 and j==2)or(i==12 and j==11)or( i==8 and j==7)) then
---                love.graphics.draw(DotTiles,UpRightTile, i*TileOffset, j*TileOffset)
---            elseif((i==2 and j==3)or(i==2 and j==12)or(i==11 and j==3)or(i==11 and j==12)or( i==7 and j==8)) then
---                love.graphics.draw(DotTiles,DownLeftTile, i*TileOffset, j*TileOffset)
---            elseif((i==3 and j==3)or(i==3 and j==12)or(i==12 and j==3)or(i==12 and j==12)or( i==8 and j==8)) then
---                love.graphics.draw(DotTiles,DownRightTile, i*TileOffset, j*TileOffset)
---            else
---                love.graphics.draw(BlankTileImg,BlankTile, i*TileOffset, j*TileOffset)
---            end
---        end
---    end
-    for _,piece in pairs(PlayerPieces) do
-        love.graphics.draw(piece[1],Piece,piece[2],piece[3])
+  for i=0,14 do
+    for j=0,14 do
+      if Pieces[i][j][1] ~= nil then
+        love.graphics.draw(Pieces[i][j][1],Piece,Pieces[i][j][2],Pieces[i][j][3])
+      end
     end
-    for _,piece in pairs(ComputerPieces) do
-        love.graphics.draw(piece[1],Piece,piece[2],piece[3])
-    end
-    love.graphics.print(TestMessage, 512,1)
+  end
+  love.graphics.print(TestMessage, 514,1)
 end
-
 
 -- Game AI
 function mmab(gameState, depth, min, max, maximize)
@@ -195,19 +228,6 @@ function mmab(gameState, depth, min, max, maximize)
         end
         return {val,bestMove,depth}
     end
-end
-
-function getEmpties(gameState)
-    moves = {}
-    for x=0,14 do
-        for y=0,14 do
-            localPiece = {_, (x*32)-12+BoardOffset, (y*32)-12+BoardOffset}
-            if(not positionTaken(localPiece,gameState)) then
-                table.insert(moves,localPiece)
-            end
-        end
-    end
-    return moves
 end
 
 function evaluate(gameState, maximize)
