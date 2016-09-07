@@ -180,13 +180,13 @@ end
 
 -- Game AI
 function mmab(gameState, depth, min, max, maximize)
-    if(won(gameState[1]) or won(gameState[2]) or depth > 20) then --Leaf
-        if(won(gameState[1]) or won(gameState[2])) then
-            print("here ")
-        end
+    if(won(WhitePiece) or won(BlackPiece) or depth > 20) then --Leaf
+        --if(won(gameState[1]) or won(gameState[2])) then
+        --    print("here ")
+        --end
         return {evaluate(gameState,maximize), _, depth}
     end
-    moves = getEmpties(gameState)
+    moves = getEmpties()
     if(maximize) then
         local val = min
         for _, move in pairs(moves) do
@@ -228,6 +228,32 @@ function mmab(gameState, depth, min, max, maximize)
         end
         return {val,bestMove,depth}
     end
+end
+
+function getEmpties()
+  empties = {}
+  for i=0,14 do
+    for j=0,14 do
+      if Pieces[i][j][1] ~= nil then
+	blanks = getAroundBlanks(Pieces[i][j])
+	for k,v in pairs(blanks) do table.insert(empties,v) end
+      end
+    end
+  end
+  return empties
+end
+
+function getAroundBlanks(piece)
+  blanks = {}
+  if Pieces[piece[1]-1][piece[2]-1][1] == nil then table.insert(blanks, {[piece[1]-1],[piece[2]-1]}) end
+  if Pieces[piece[1]][piece[2]-1][1] == nil then table.insert(blanks, {[piece[1]],[piece[2]-1]}) end
+  if Pieces[piece[1]+1][piece[2]-1][1] == nil then table.insert(blanks, {[piece[1]+1],[piece[2]-1]}) end
+  if Pieces[piece[1]-1][piece[2]][1] == nil then table.insert(blanks, {[piece[1]-1],[piece[2]]}) end
+  if Pieces[piece[1]+1][piece[2]][1] == nil then table.insert(blanks, {[piece[1]+1],[piece[2]]}) end
+  if Pieces[piece[1]-1][piece[2]+1][1] == nil then table.insert(blanks, {[piece[1]-1],[piece[2]+1]}) end
+  if Pieces[piece[1]][piece[2]+1][1] == nil then table.insert(blanks, {[piece[1]],[piece[2]+1]}) end
+  if Pieces[piece[1]+1][piece[2]+1][1] == nil then table.insert(blanks, {[piece[1]+1],[piece[2]+1]}) end
+  return blanks
 end
 
 function evaluate(gameState, maximize)
