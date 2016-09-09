@@ -1,4 +1,7 @@
 function love.load()
+    --require modules
+    --require "board"
+    
     --Geting Imgs
     BlackPiece = love.graphics.newImage('assets/blackPiece.png')
     WhitePiece = love.graphics.newImage('assets/whitePiece.png')
@@ -10,13 +13,13 @@ function love.load()
     --Data Structs that will be used
     --PlayerPieces = {}
     --ComputerPieces = {}
-    Pieces = {}
-    for i=0,14 do
-      Pieces[i] = {}
-      for j=0,14 do
-	Pieces[i][j] = {}
-      end
-    end
+    Pieces = Board:start()
+--    for i=0,14 do
+--      Pieces[i] = {}
+--      for j=0,14 do
+--	Pieces[i][j] = {}
+--      end
+--    end
     TestMessage = "Nothing till now"
     TileOffset = 32
     BoardOffset = 16
@@ -33,7 +36,8 @@ function won(playerColorPiece)
 	  currentPiece = {Pieces[i][j][1], x, y}
 	  neigV = (verticalNeighbours(currentPiece) == 4)
 	  neigH = (horizontalNeighbours(currentPiece) == 4)
-	  neigD = (diagonalNeighbours(currentPiece) == 4)
+	  neigrD = (rightDiagonalNeighbours(currentPiece) == 4)
+	  neiglD = (leftDiagonalNeighbours(currentPiece) == 4)
 	  if(neigV or neigH or neigD) then
 	    return true
 	  end
@@ -92,7 +96,7 @@ function horizontalNeighbours(piece)
     return countUp + countDown
 end
 
-function diagonalNeighbours(piece)
+function leftDiagonalNeighbours(piece)
     countUp = 0
     countDown = 0
     for i=1,4 do
@@ -107,6 +111,30 @@ function diagonalNeighbours(piece)
     for i=-1,-4,-1 do
       if piece[2]+i > 0 and piece[3]+i > 0 then
 	if Pieces[piece[2]+i][piece[3]+i][1] == piece[1] then
+	  countDown = countDown + 1
+	else
+	  break
+	end
+      end
+    end
+    return countUp + countDown
+end
+
+function rightDiagonalNeighbours(piece)
+    countUp = 0
+    countDown = 0
+    for i=1,4 do
+      if piece[2]+i < 16 and piece[3]-i < 16 then
+	if Pieces[piece[2]+i][piece[3]-i][1] == piece[1] then
+	  countUp = countUp + 1
+	else
+	  break
+	end
+      end
+    end
+    for i=-1,-4,-1 do
+      if piece[2]+i > 0 and piece[3]-i > 0 then
+	if Pieces[piece[2]+i][piece[3]-i][1] == piece[1] then
 	  countDown = countDown + 1
 	else
 	  break
@@ -179,20 +207,20 @@ function love.draw(dt)
 end
 
 -- Game AI
-function mmab(gameState, depth, min, max, maximize)
-    if(won(WhitePiece) or won(BlackPiece) or depth > 20) then --Leaf
+function mmab(depth, min, max, maximize)
+    if(won(WhitePiece) or won(BlackPiece) or depth > 5) then --Leaf
         --if(won(gameState[1]) or won(gameState[2])) then
         --    print("here ")
         --end
-        return {evaluate(gameState,maximize), _, depth}
+        return {evaluate(maximize), _, depth}
     end
     moves = getEmpties()
     if(maximize) then
         local val = min
         for _, move in pairs(moves) do
-            local childGameState = {gameState[1],gameState[2]}
-            table.insert(childGameState[2],{WhitePiece,move[2],move[3]})
-            local eval = mmab(gameState,depth+1,val,max,false)
+	    Pieces[move[1]][move[2]] = {WhitePiece,move[1],move[2]}
+            --table.insert(childGameState[2],{WhitePiece,move[2],move[3]})
+            local eval = mmab(depth+1,val,max,false)
             if(depth < eval[3]) then
                 depth = eval[3]
             end
@@ -200,7 +228,8 @@ function mmab(gameState, depth, min, max, maximize)
                 val = eval[1]
                 bestMove = move
             end
-            table.remove(childGameState[2])
+	    Pieces[move[1]][move[2]] = {}
+            --table.remove(childGameState[2])
             if val > max then 
                 print("max cut")
                 return {max, bestMove,depth} 
@@ -210,9 +239,10 @@ function mmab(gameState, depth, min, max, maximize)
     else
         local val = max
         for _, move in pairs(moves) do
-            local childGameState = {gameState[1],gameState[2]}
-            table.insert(childGameState[1],{BlackPiece,move[2],move[3]})
-            local eval = mmab(gameState,depth+1,min,val,true)
+	    Pieces[move[1]][move[2]] = {BlackPiece,move[1],move[2]}
+            --local childGameState = {gameState[1],gameState[2]}
+            --table.insert(childGameState[1],{BlackPiece,move[2],move[3]})
+            local eval = mmab(depth+1,min,val,true)
             if(depth < eval[3]) then
                 depth = eval[3]
             end
@@ -220,7 +250,8 @@ function mmab(gameState, depth, min, max, maximize)
                 val = eval[1]
                 bestMove = move
             end
-            table.remove(childGameState[1])
+	    Pieces[move[1]][move[2]] = {}
+	    --table.remove(childGameState[1])
             if val < min then 
                 print("mix cut")
                 return {min, bestMove,depth}
@@ -256,44 +287,8 @@ function getAroundBlanks(piece)
   return blanks
 end
 
-function evaluate(gameState, maximize)
-    oneWay = 0
-    twoWay = 0
-    threeWay = 0
-    if maximize then
-        gamePieces = gameState[1]
-    else
-        gamePieces = gameState[2]
-    end
-    for _, piece in pairs(gamePieces) do
-        neigV = verticalNeighbours(piece,gamePieces,0)
-        neigH = horizontalNeighbours(piece,gamePieces,0)
-        neigD = diagonalNeighbours(piece,gamePieces,0)
-        if neigV == 4 then
-            oneWay = oneWay + 1
-        elseif neigV == 3 then
-            twoWay = twoWay + 1
-        elseif neigV == 2 then
-            threeWay = threeWay + 1
-        end
-
-        if neigH == 4 then
-            oneWay = oneWay + 1
-        elseif neigH == 3 then
-            twoWay = twoWay + 1
-        elseif neigH == 2 then
-            threeWay = threeWay + 1
-        end
-
-        if neigD == 4 then
-            oneWay = oneWay + 1
-        elseif neigD == 3 then
-            twoWay = twoWay + 1
-        elseif neigD == 2 then
-            threeWay = threeWay + 1
-        end
-    end
-    evaluation = oneWay * 100.0 + twoWay * 5.0 + threeWay * 1.0
+function evaluate(move)
+    evaluation = 0
     --print(evaluation)
     --print(rnd)
     return evaluation
