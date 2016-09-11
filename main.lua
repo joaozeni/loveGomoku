@@ -1,11 +1,12 @@
 function love.load()
     --require modules
-    --require "board"
+    require 'board'
+    --require 'player'
     
     --Geting Imgs
     BlackPiece = love.graphics.newImage('assets/blackPiece.png')
     WhitePiece = love.graphics.newImage('assets/whitePiece.png')
-    Board = love.graphics.newImage('assets/board.png')
+    BoardImg = love.graphics.newImage('assets/board.png')
     
     --Creating Quads
     Piece = love.graphics.newQuad(0, 0, 24, 24, 24,24)
@@ -13,135 +14,14 @@ function love.load()
     --Data Structs that will be used
     --PlayerPieces = {}
     --ComputerPieces = {}
-    Pieces = Board:start()
---    for i=0,14 do
---      Pieces[i] = {}
---      for j=0,14 do
---	Pieces[i][j] = {}
---      end
---    end
+    Board = Board:new()
+    DrawPieces = {}
+    
     TestMessage = "Nothing till now"
     TileOffset = 32
     BoardOffset = 16
     PlayerTurn = true
     ComputerTurn = false
-end
-
-function won(playerColorPiece)
-    for i=0,14 do
-      for j=0,14 do
-	if Pieces[i][j][1] == playerColorPiece then
-	  x = (Pieces[i][j][2] - BoardOffset + 12)/32
-	  y = (Pieces[i][j][3] - BoardOffset + 12)/32
-	  currentPiece = {Pieces[i][j][1], x, y}
-	  neigV = (verticalNeighbours(currentPiece) == 4)
-	  neigH = (horizontalNeighbours(currentPiece) == 4)
-	  neigrD = (rightDiagonalNeighbours(currentPiece) == 4)
-	  neiglD = (leftDiagonalNeighbours(currentPiece) == 4)
-	  if(neigV or neigH or neigD) then
-	    return true
-	  end
-	end
-      end
-    end
-    return false
-end
-
-function verticalNeighbours(piece)
-    countUp = 0
-    countDown = 0
-    print("x"..piece[2])
-    for i=1,4 do
-      if piece[3]+i < 16 then
-	if Pieces[piece[2]][piece[3]+i][1] == piece[1] then
-	  countUp = countUp + 1
-	else
-	  break
-	end
-      end
-    end
-    for i=-1,-4,-1 do
-      if piece[3]+i > 0 then
-	if Pieces[piece[2]][piece[3]+i][1] == piece[1] then
-	  countDown = countDown + 1
-	else
-	  break
-	end
-      end
-    end
-    return countUp + countDown
-end
-
-function horizontalNeighbours(piece)
-    countUp = 0
-    countDown = 0
-    for i=1,4 do
-      if piece[2]+i < 16 then
-	if Pieces[piece[2]+i][piece[3]][1] == piece[1] then
-	  countUp = countUp + 1
-	else
-	  break
-	end
-      end
-    end
-    for i=-1,-4,-1 do
-      if piece[2]+i > 0 then
-	if Pieces[piece[2]+i][piece[3]][1] == piece[1] then
-	  countDown = countDown + 1
-	else
-	  break
-	end
-      end
-    end
-    return countUp + countDown
-end
-
-function leftDiagonalNeighbours(piece)
-    countUp = 0
-    countDown = 0
-    for i=1,4 do
-      if piece[2]+i < 16 and piece[3]+i < 16 then
-	if Pieces[piece[2]+i][piece[3]+i][1] == piece[1] then
-	  countUp = countUp + 1
-	else
-	  break
-	end
-      end
-    end
-    for i=-1,-4,-1 do
-      if piece[2]+i > 0 and piece[3]+i > 0 then
-	if Pieces[piece[2]+i][piece[3]+i][1] == piece[1] then
-	  countDown = countDown + 1
-	else
-	  break
-	end
-      end
-    end
-    return countUp + countDown
-end
-
-function rightDiagonalNeighbours(piece)
-    countUp = 0
-    countDown = 0
-    for i=1,4 do
-      if piece[2]+i < 16 and piece[3]-i < 16 then
-	if Pieces[piece[2]+i][piece[3]-i][1] == piece[1] then
-	  countUp = countUp + 1
-	else
-	  break
-	end
-      end
-    end
-    for i=-1,-4,-1 do
-      if piece[2]+i > 0 and piece[3]-i > 0 then
-	if Pieces[piece[2]+i][piece[3]-i][1] == piece[1] then
-	  countDown = countDown + 1
-	else
-	  break
-	end
-      end
-    end
-    return countUp + countDown
 end
 
 function love.update(dt)
@@ -150,7 +30,9 @@ function love.update(dt)
         local mmabResult = mmab({PlayerPieces,ComputerPieces}, 0, -10000, 10000, true)
 	x = (mmabResult[2][2] - BoardOffset + 12)/32
 	y = (mmabResult[2][3] - BoardOffset + 12)/32
-	Pieces[x][y] = {WhitePiece, mmabResult[2][2], mmabResult[2][3]}
+	Board:insert(x,y,"w")
+	table.insert(DrawPieces, {WhitePiece, mmabResult[2][2], mmabResult[2][3]})
+	--Pieces[x][y] = {WhitePiece, mmabResult[2][2], mmabResult[2][3]}
         --table.insert(ComputerPieces, {WhitePiece, mmabResult[2][2], mmabResult[2][3]})
         print(mmabResult[3])
         PlayerTurn = true
@@ -163,12 +45,6 @@ function roundUp(numToRound, multiple)
     return numToRound - mod
 end
 
-function positionTaken(piece)
-  x = (piece[2] - BoardOffset + 12)/32
-  y = (piece[3] - BoardOffset + 12)/32
-  return Pieces[x][y][1] ~= nil
-end
-
 function love.mousepressed(x,y,btn)
     --TestMessage = "Pressed X:" .. x .. " Y: " .. y
     xRelativePos = math.abs(math.floor((x-BoardOffset)/TileOffset) - (x-BoardOffset)/TileOffset)
@@ -178,13 +54,17 @@ function love.mousepressed(x,y,btn)
         newY = roundUp(y,32) + BoardOffset
         if(PlayerTurn) then
             localPiece = {BlackPiece, newX-12, newY-12}
-            if(not positionTaken(localPiece)) then
+	    x = (localPiece[2] - BoardOffset + 12)/32
+	    y = (localPiece[3] - BoardOffset + 12)/32
+            if(not Board:positionTaken(x,y)) then
+	        Board:insert(x,y,"b")
+		table.insert(DrawPieces, localPiece)
                 --PlayerTurn = not PlayerTurn
-	        x = (localPiece[2] - BoardOffset + 12)/32
-	        y = (localPiece[3] - BoardOffset + 12)/32
-		Pieces[x][y] = localPiece
+	        --x = (localPiece[2] - BoardOffset + 12)/32
+	        --y = (localPiece[3] - BoardOffset + 12)/32
+		--Pieces[x][y] = localPiece
                 --table.insert(PlayerPieces, localPiece)
-                if(won(BlackPiece)) then
+                if(Board:won("b")) then
                     print("player won")
                 --else
                     ComputerTurn = false
@@ -195,20 +75,16 @@ function love.mousepressed(x,y,btn)
 end
 
 function love.draw(dt)
-  love.graphics.draw(Board,0,0,0,0.25)
-  for i=0,14 do
-    for j=0,14 do
-      if Pieces[i][j][1] ~= nil then
-        love.graphics.draw(Pieces[i][j][1],Piece,Pieces[i][j][2],Pieces[i][j][3])
-      end
-    end
+  love.graphics.draw(BoardImg,0,0,0,0.25)
+  for _, piece in pairs(DrawPieces) do
+    love.graphics.draw(piece[1],Piece,piece[2],piece[3])
   end
   love.graphics.print(TestMessage, 514,1)
 end
 
 -- Game AI
 function mmab(depth, min, max, maximize)
-    if(won(WhitePiece) or won(BlackPiece) or depth > 5) then --Leaf
+    if(Board:won("w") or Board:won("b") or depth > 5) then --Leaf
         --if(won(gameState[1]) or won(gameState[2])) then
         --    print("here ")
         --end
@@ -274,18 +150,18 @@ function getEmpties()
   return empties
 end
 
-function getAroundBlanks(piece)
-  blanks = {}
-  if Pieces[piece[1]-1][piece[2]-1][1] == nil then table.insert(blanks, {[piece[1]-1],[piece[2]-1]}) end
-  if Pieces[piece[1]][piece[2]-1][1] == nil then table.insert(blanks, {[piece[1]],[piece[2]-1]}) end
-  if Pieces[piece[1]+1][piece[2]-1][1] == nil then table.insert(blanks, {[piece[1]+1],[piece[2]-1]}) end
-  if Pieces[piece[1]-1][piece[2]][1] == nil then table.insert(blanks, {[piece[1]-1],[piece[2]]}) end
-  if Pieces[piece[1]+1][piece[2]][1] == nil then table.insert(blanks, {[piece[1]+1],[piece[2]]}) end
-  if Pieces[piece[1]-1][piece[2]+1][1] == nil then table.insert(blanks, {[piece[1]-1],[piece[2]+1]}) end
-  if Pieces[piece[1]][piece[2]+1][1] == nil then table.insert(blanks, {[piece[1]],[piece[2]+1]}) end
-  if Pieces[piece[1]+1][piece[2]+1][1] == nil then table.insert(blanks, {[piece[1]+1],[piece[2]+1]}) end
-  return blanks
-end
+--function getAroundBlanks(piece)
+--  blanks = {}
+--  if Pieces[piece[1]-1][piece[2]-1][1] == nil then table.insert(blanks, {[piece[1]-1],[piece[2]-1]}) end
+--  if Pieces[piece[1]][piece[2]-1][1] == nil then table.insert(blanks, {[piece[1]],[piece[2]-1]}) end
+--  if Pieces[piece[1]+1][piece[2]-1][1] == nil then table.insert(blanks, {[piece[1]+1],[piece[2]-1]}) end
+--  if Pieces[piece[1]-1][piece[2]][1] == nil then table.insert(blanks, {[piece[1]-1],[piece[2]]}) end
+--  if Pieces[piece[1]+1][piece[2]][1] == nil then table.insert(blanks, {[piece[1]+1],[piece[2]]}) end
+--  if Pieces[piece[1]-1][piece[2]+1][1] == nil then table.insert(blanks, {[piece[1]-1],[piece[2]+1]}) end
+--  if Pieces[piece[1]][piece[2]+1][1] == nil then table.insert(blanks, {[piece[1]],[piece[2]+1]}) end
+--  if Pieces[piece[1]+1][piece[2]+1][1] == nil then table.insert(blanks, {[piece[1]+1],[piece[2]+1]}) end
+--  return blanks
+--end
 
 function evaluate(move)
     evaluation = 0
