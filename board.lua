@@ -82,7 +82,7 @@ function Board:verticalOpenPaths(x,y)
 	end
       end
     end
-    return countUp + countDown
+    return {countUp + countDown}
 end
 
 function Board:horizontalOpenPaths(x,y)
@@ -113,7 +113,7 @@ function Board:horizontalOpenPaths(x,y)
 	end
       end
     end
-    return countUp + countDown
+    return {countUp + countDown}
 end
 
 function Board:leftDiagonalOpenPaths(x,y)
@@ -144,7 +144,7 @@ function Board:leftDiagonalOpenPaths(x,y)
 	end
       end
     end
-    return countUp + countDown
+    return {countUp + countDown}
 end
 
 function Board:rightDiagonalOpenPaths(x,y)
@@ -175,7 +175,7 @@ function Board:rightDiagonalOpenPaths(x,y)
 	end
       end
     end
-    return countUp + countDown
+    return {countUp + countDown}
 end
 
 function Board:getEmpties()

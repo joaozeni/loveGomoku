@@ -61,15 +61,15 @@ function love.mousepressed(x,y,btn)
             if(not Board:positionTaken(x,y)) then
 	        Board:insert(x,y,"b")
 		table.insert(DrawPieces, localPiece)
-                PlayerTurn = not PlayerTurn
+                --PlayerTurn = not PlayerTurn
 	        --x = (localPiece[2] - BoardOffset + 12)/32
 	        --y = (localPiece[3] - BoardOffset + 12)/32
 		--Pieces[x][y] = localPiece
                 --table.insert(PlayerPieces, localPiece)
                 if(Board:won("b")) then
                     print("player won")
-                else
-                    ComputerTurn = true
+                --else
+                --    ComputerTurn = true
                 end
             end
         end
