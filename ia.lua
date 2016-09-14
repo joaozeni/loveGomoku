@@ -21,7 +21,7 @@ function IA:mmab(board, depth, min, max, maximize)
         local val = min
         for _, move in pairs(moves) do
             --local eval = mmab(board, depth+1, move, val, max, false)
-	    board:insert(move[1],move[2], "w")
+	    --board:insert(move[1],move[2], "w")
             local eval = IA:mmab(board, depth+1, val, max, false)
             print("x "..move[1].." y "..move[2].." eval "..eval[1])
             if(depth < eval[3]) then
@@ -66,13 +66,15 @@ function IA:evaluate(board, maximize)
     moves = board:getEmpties()
     if maximize then
       color = "b"
+      openenteColor = "w"
     else
       color = "w"
+      openenteColor = "b"
     end
     for _, move in pairs(moves) do
       val = IA:evaluatePosition(move[1], move[2], color, board)
-      openentVal = IA:evaluatePosition(move[1], move[2], "w", board)
-      evaluation = evaluation + val - openentVal
+      --openentVal = IA:evaluatePosition(move[1], move[2], openenteColor, board)
+      evaluation = evaluation + val
     end
     --print(evaluation)
     --print(rnd)
@@ -95,7 +97,7 @@ function IA:evaluatePosition(x, y, color, board)
   --horizontalOpenent = board:horizontalOpenPaths(x, y, oponentColor)
   --rightDiagonalOpenent = board:rightDiagonalOpenPaths(x, y, oponentColor)
   --leftDiagonalOpenent = board:leftDiagonalOpenPaths(x, y, oponentColor)
-  --print("x "..x.." y "..y)
+  --print("x "..x.." y "..y.." opens "..horizontal[3].." n "..horizontal[1])
   --print(vertical[1] + vertical[3] > 3)
   if vertical[1] + vertical[3] > 3 then
     evaluation = evaluation + (vertical[3]*(10^vertical[1]))
