@@ -28,12 +28,12 @@ end
 function love.update(dt)
     if(ComputerTurn) then
         ComputerTurn = not ComputerTurn
-        local mmabResult = IA:mmab(Board, 0, {}, -10000, 10000, true)
+        local mmabResult = IA:mmab(Board, 0, -10000, 10000, true)
         --local mmabResult = mmab({PlayerPieces,ComputerPieces}, 0, -10000, 10000, true)
-	x = (mmabResult[2][1] - BoardOffset + 12)/32
-	y = (mmabResult[2][2] - BoardOffset + 12)/32
-	Board:insert(x,y,"w")
-	table.insert(DrawPieces, {WhitePiece, mmabResult[2][1], mmabResult[2][2]})
+	vx = (32*mmabResult[2][1] + BoardOffset - 12)
+	vy = (32*mmabResult[2][2] + BoardOffset - 12)
+	Board:insert(mmabResult[2][1],mmabResult[2][2],"w")
+	table.insert(DrawPieces, {WhitePiece, vx, vy})
 	--Pieces[x][y] = {WhitePiece, mmabResult[2][2], mmabResult[2][3]}
         --table.insert(ComputerPieces, {WhitePiece, mmabResult[2][2], mmabResult[2][3]})
         print(mmabResult[3])
@@ -68,8 +68,8 @@ function love.mousepressed(x,y,btn)
                 --table.insert(PlayerPieces, localPiece)
                 if(Board:won("b")) then
                     print("player won")
-                --else
-                --    ComputerTurn = true
+                else
+                    ComputerTurn = true
                 end
             end
         end

@@ -25,6 +25,7 @@ function Board:start()
 end
 
 function Board:insert(x,y,color)
+  --print("x "..x.." y "..y)
   self.pieces[x][y] = color
 end
 
@@ -41,11 +42,15 @@ function Board:won(color)
     for i=0,14 do
       for j=0,14 do
 	if self.pieces[i][j] == color then
-	  neigV = (Board:verticalOpenPaths(i,j)[1] == 4)
-	  neigH = (Board:horizontalOpenPaths(i,j)[1] == 4)
-	  neigrD = (Board:rightDiagonalOpenPaths(i,j)[1] == 4)
-	  neiglD = (Board:leftDiagonalOpenPaths(i,j)[1] == 4)
-	  if (neigV or neigH or neigrD or neiglD) then
+	  neigV = Board:verticalOpenPaths(i,j)
+	  neigH = Board:horizontalOpenPaths(i,j)
+	  neigrD = Board:rightDiagonalOpenPaths(i,j)
+	  neiglD = Board:leftDiagonalOpenPaths(i,j)
+	  neigVSize = (neigV[1] + neigV[2] == 4)
+	  neigHSize = (neigH[1] + neigH[2] == 4)
+	  neigrDSize = (neigrD[1] + neigrD[2] == 4)
+	  neiglDSize = (neiglD[1] + neiglD[2] == 4)
+	  if (neigVSize or neigHSize or neigrDSize or neiglDSize) then
 	    return true
 	  end
 	end
@@ -54,12 +59,16 @@ function Board:won(color)
     return false
 end
 
-function Board:verticalOpenPaths(x,y)
+function Board:verticalOpenPaths(x, y, passedColor)
     countUp = 0
     countDown = 0
     countOpenUp = 0
     countOpenDown = 0
-    color = self.pieces[x][y]
+    if self.pieces[x][y] == 0 then
+      color = passedColor
+    else
+      color = self.pieces[x][y]
+    end
     for i=1,4 do
       if y+i < 16 then
 	if self.pieces[x][y+i] == color then
@@ -82,15 +91,19 @@ function Board:verticalOpenPaths(x,y)
 	end
       end
     end
-    return {countUp + countDown}
+    return {countUp, countDown, countOpenUp, countOpenDown}
 end
 
-function Board:horizontalOpenPaths(x,y)
+function Board:horizontalOpenPaths(x, y, passedColor)
     countUp = 0
     countDown = 0
     countOpenUp = 0
     countOpenDown = 0
-    color = self.pieces[x][y]
+    if self.pieces[x][y] == 0 then
+      color = passedColor
+    else
+      color = self.pieces[x][y]
+    end
     for i=1,4 do
       if x+i < 16 then
 	if self.pieces[x+i][y] == color then
@@ -113,15 +126,19 @@ function Board:horizontalOpenPaths(x,y)
 	end
       end
     end
-    return {countUp + countDown}
+    return {countUp, countDown, countOpenUp, countOpenDown}
 end
 
-function Board:leftDiagonalOpenPaths(x,y)
+function Board:leftDiagonalOpenPaths(x, y, passedColor)
     countUp = 0
     countDown = 0
     countOpenUp = 0
     countOpenDown = 0
-    color = self.pieces[x][y]
+    if self.pieces[x][y] == 0 then
+      color = passedColor
+    else
+      color = self.pieces[x][y]
+    end
     for i=1,4 do
       if x+i < 16 and y+i < 16 then
 	if self.pieces[x+i][y+i] == color then
@@ -144,15 +161,19 @@ function Board:leftDiagonalOpenPaths(x,y)
 	end
       end
     end
-    return {countUp + countDown}
+    return {countUp, countDown, countOpenUp, countOpenDown}
 end
 
-function Board:rightDiagonalOpenPaths(x,y)
+function Board:rightDiagonalOpenPaths(x, y, passedColor)
     countUp = 0
     countDown = 0
     countOpenUp = 0
     countOpenDown = 0
-    color = self.pieces[x][y]
+    if self.pieces[x][y] == 0 then
+      color = passedColor
+    else
+      color = self.pieces[x][y]
+    end
     for i=1,4 do
       if x+i < 16 and y-i < 16 then
 	if self.pieces[x+i][y-i] == color then
@@ -175,7 +196,7 @@ function Board:rightDiagonalOpenPaths(x,y)
 	end
       end
     end
-    return {countUp + countDown}
+    return {countUp, countDown, countOpenUp, countOpenDown}
 end
 
 function Board:getEmpties()
@@ -193,13 +214,30 @@ end
 
 function Board:getAroundBlanks(x,y)
   blanks = {}
-  if self.pieces[x-1][y-1] == 0 then table.insert(blanks, {x-1,x-1}) end
-  if self.pieces[x][y-1] == 0 then table.insert(blanks, {x,y-1}) end
-  if self.pieces[x+1][y-1] == 0 then table.insert(blanks, {x+1,y-1}) end
-  if self.pieces[x-1][y] == 0 then table.insert(blanks, {x-1,y}) end
-  if self.pieces[x+1][y] == 0 then table.insert(blanks, {x+1,y}) end
-  if self.pieces[x-1][y+1] == 0 then table.insert(blanks, {x-1,y+1}) end
-  if self.pieces[x][y+1] == 0 then table.insert(blanks, {x,y+1}) end
-  if self.pieces[x+1][y+1] == 0 then table.insert(blanks, {x+1,y+1}) end
+  --print("x "..x.." y "..y)
+  if x-1 >= 0 and y-1 >= 0 then
+    if self.pieces[x-1][y-1] == 0 then table.insert(blanks, {x-1,y-1}) end
+  end
+  if y-1 >= 0 then
+    if self.pieces[x][y-1] == 0 and y-1 >= 0 then table.insert(blanks, {x,y-1}) end
+  end
+  if x+1 <= 16 and y-1 >= 0 then
+    if self.pieces[x+1][y-1] == 0 and x+1 <= 15 and y-1 >= 0 then table.insert(blanks, {x+1,y-1}) end
+  end
+  if x-1 >= 0 then
+    if self.pieces[x-1][y] == 0 and x-1 >= 0 then table.insert(blanks, {x-1,y}) end
+  end
+  if x+1 <= 16 then
+    if self.pieces[x+1][y] == 0 and x+1 <= 15 then table.insert(blanks, {x+1,y}) end
+  end
+  if x-1 >= 0 and y+1 <= 16 then
+    if self.pieces[x-1][y+1] == 0 and x-1 >= 0 and y+1 <= 15 then table.insert(blanks, {x-1,y+1}) end
+  end
+  if y+1 <= 16 then
+    if self.pieces[x][y+1] == 0 and y+1 <= 15 then table.insert(blanks, {x,y+1}) end
+  end
+  if x+1 <= 16 and y+1 <= 16 then
+    if self.pieces[x+1][y+1] == 0 and x+1 <= 15 and y+1 <= 15 then table.insert(blanks, {x+1,y+1}) end
+  end
   return blanks
 end
