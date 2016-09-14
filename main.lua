@@ -36,7 +36,7 @@ function love.update(dt)
 	table.insert(DrawPieces, {WhitePiece, vx, vy})
 	--Pieces[x][y] = {WhitePiece, mmabResult[2][2], mmabResult[2][3]}
         --table.insert(ComputerPieces, {WhitePiece, mmabResult[2][2], mmabResult[2][3]})
-        print(mmabResult[3])
+        --print(mmabResult[3])
         PlayerTurn = true
         --ai()
     end
@@ -83,65 +83,3 @@ function love.draw(dt)
   end
   love.graphics.print(TestMessage, 514,1)
 end
-
--- Game AI
---function mmab(depth, min, max, maximize)
---    if(Board:won("w") or Board:won("b") or depth > 5) then --Leaf
---        --if(won(gameState[1]) or won(gameState[2])) then
---        --    print("here ")
---        --end
---        return {evaluate(maximize), _, depth}
---    end
---    moves = getEmpties()
---    if(maximize) then
---        local val = min
---        for _, move in pairs(moves) do
---	    Pieces[move[1]][move[2]] = {WhitePiece,move[1],move[2]}
---            --table.insert(childGameState[2],{WhitePiece,move[2],move[3]})
---            local eval = mmab(depth+1,val,max,false)
---            if(depth < eval[3]) then
---                depth = eval[3]
---            end
---            if(val < eval[1]) then
---                val = eval[1]
---                bestMove = move
---            end
---	    Pieces[move[1]][move[2]] = {}
---            --table.remove(childGameState[2])
---            if val > max then 
---                print("max cut")
---                return {max, bestMove,depth} 
---            end
---        end
---        return {val,bestMove,depth}
---    else
---        local val = max
---        for _, move in pairs(moves) do
---	    Pieces[move[1]][move[2]] = {BlackPiece,move[1],move[2]}
---            --local childGameState = {gameState[1],gameState[2]}
---            --table.insert(childGameState[1],{BlackPiece,move[2],move[3]})
---            local eval = mmab(depth+1,min,val,true)
---            if(depth < eval[3]) then
---                depth = eval[3]
---            end
---            if(val > eval[1]) then
---                val = eval[1]
---                bestMove = move
---            end
---	    Pieces[move[1]][move[2]] = {}
---	    --table.remove(childGameState[1])
---            if val < min then 
---                print("mix cut")
---                return {min, bestMove,depth}
---            end
---        end
---        return {val,bestMove,depth}
---    end
---end
---
---function evaluate(move)
---    evaluation = 0
---    --print(evaluation)
---    --print(rnd)
---    return evaluation
---end

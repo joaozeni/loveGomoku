@@ -70,7 +70,7 @@ function Board:verticalOpenPaths(x, y, passedColor)
       color = self.pieces[x][y]
     end
     for i=1,4 do
-      if y+i < 16 then
+      if y+i <= 14 then
 	if self.pieces[x][y+i] == color then
 	  countUp = countUp + 1
 	elseif self.pieces[x][y+i] == 0 then
@@ -81,7 +81,7 @@ function Board:verticalOpenPaths(x, y, passedColor)
       end
     end
     for i=-1,-4,-1 do
-      if y+i > 0 then
+      if y+i >= 0 then
 	if self.pieces[x][y+i] == color then
 	  countDown = countDown + 1
 	elseif self.pieces[x][y+i] == 0 then
@@ -105,7 +105,7 @@ function Board:horizontalOpenPaths(x, y, passedColor)
       color = self.pieces[x][y]
     end
     for i=1,4 do
-      if x+i < 16 then
+      if x+i <= 14 then
 	if self.pieces[x+i][y] == color then
 	  countUp = countUp + 1
 	elseif self.pieces[x+i][y] == 0 then
@@ -116,7 +116,7 @@ function Board:horizontalOpenPaths(x, y, passedColor)
       end
     end
     for i=-1,-4,-1 do
-      if x+i > 0 then
+      if x+i >= 0 then
 	if self.pieces[x+i][y] == color then
 	  countDown = countDown + 1
 	elseif self.pieces[x+i][y] == 0 then
@@ -140,7 +140,7 @@ function Board:leftDiagonalOpenPaths(x, y, passedColor)
       color = self.pieces[x][y]
     end
     for i=1,4 do
-      if x+i < 16 and y+i < 16 then
+      if x+i <= 14 and y+i <= 14 then
 	if self.pieces[x+i][y+i] == color then
 	  countUp = countUp + 1
 	elseif self.pieces[x+i][y+i] == 0 then
@@ -151,7 +151,7 @@ function Board:leftDiagonalOpenPaths(x, y, passedColor)
       end
     end
     for i=-1,-4,-1 do
-      if x+i > 0 and y+i > 0 then
+      if x+i >= 0 and y+i >= 0 then
 	if self.pieces[x+i][y+i] == color then
 	  countDown = countDown + 1
 	elseif self.pieces[x+i][y+i] == 0 then
@@ -175,7 +175,7 @@ function Board:rightDiagonalOpenPaths(x, y, passedColor)
       color = self.pieces[x][y]
     end
     for i=1,4 do
-      if x+i < 16 and y-i < 16 then
+      if x+i <= 14 and y-i <= 14 then
 	if self.pieces[x+i][y-i] == color then
 	  countUp = countUp + 1
 	elseif self.pieces[x+i][y-i] == 0 then
@@ -186,7 +186,7 @@ function Board:rightDiagonalOpenPaths(x, y, passedColor)
       end
     end
     for i=-1,-4,-1 do
-      if x+i > 0 and y-i > 0 then
+      if x+i >= 0 and y-i >= 0 then
 	if self.pieces[x+i][y-i] == color then
 	  countDown = countDown + 1
 	elseif self.pieces[x+i][y-i] == 0 then
@@ -219,25 +219,25 @@ function Board:getAroundBlanks(x,y)
     if self.pieces[x-1][y-1] == 0 then table.insert(blanks, {x-1,y-1}) end
   end
   if y-1 >= 0 then
-    if self.pieces[x][y-1] == 0 and y-1 >= 0 then table.insert(blanks, {x,y-1}) end
+    if self.pieces[x][y-1] == 0 then table.insert(blanks, {x,y-1}) end
   end
-  if x+1 <= 16 and y-1 >= 0 then
-    if self.pieces[x+1][y-1] == 0 and x+1 <= 15 and y-1 >= 0 then table.insert(blanks, {x+1,y-1}) end
+  if x+1 <= 14 and y-1 >= 0 then
+    if self.pieces[x+1][y-1] == 0 then table.insert(blanks, {x+1,y-1}) end
   end
   if x-1 >= 0 then
-    if self.pieces[x-1][y] == 0 and x-1 >= 0 then table.insert(blanks, {x-1,y}) end
+    if self.pieces[x-1][y] == 0 then table.insert(blanks, {x-1,y}) end
   end
-  if x+1 <= 16 then
-    if self.pieces[x+1][y] == 0 and x+1 <= 15 then table.insert(blanks, {x+1,y}) end
+  if x+1 <= 14 then
+    if self.pieces[x+1][y] == 0 then table.insert(blanks, {x+1,y}) end
   end
-  if x-1 >= 0 and y+1 <= 16 then
-    if self.pieces[x-1][y+1] == 0 and x-1 >= 0 and y+1 <= 15 then table.insert(blanks, {x-1,y+1}) end
+  if x-1 >= 0 and y+1 <= 14 then
+    if self.pieces[x-1][y+1] == 0 then table.insert(blanks, {x-1,y+1}) end
   end
-  if y+1 <= 16 then
-    if self.pieces[x][y+1] == 0 and y+1 <= 15 then table.insert(blanks, {x,y+1}) end
+  if y+1 <= 14 then
+    if self.pieces[x][y+1] == 0 then table.insert(blanks, {x,y+1}) end
   end
-  if x+1 <= 16 and y+1 <= 16 then
-    if self.pieces[x+1][y+1] == 0 and x+1 <= 15 and y+1 <= 15 then table.insert(blanks, {x+1,y+1}) end
+  if x+1 <= 14 and y+1 <= 14 then
+    if self.pieces[x+1][y+1] == 0 then table.insert(blanks, {x+1,y+1}) end
   end
   return blanks
 end

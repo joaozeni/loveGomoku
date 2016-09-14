@@ -10,11 +10,11 @@ end
 function IA:mmab(board, depth, min, max, maximize)
     --print("min")
     --print(min)
-    if(board:won("w") or board:won("b") or depth > 5) then --Leaf
+    if(board:won("w") or board:won("b") or depth > 0) then --Leaf
         if(board:won("b") or board:won("w")) then
-            print("here ")
+            --print("here ")
         end
-        return {IA:evaluate(board), _, depth}
+        return {IA:evaluate(board, maximize), _, depth}
     end
     moves = board:getEmpties()
     if(maximize) then
@@ -23,6 +23,7 @@ function IA:mmab(board, depth, min, max, maximize)
             --local eval = mmab(board, depth+1, move, val, max, false)
 	    board:insert(move[1],move[2], "w")
             local eval = IA:mmab(board, depth+1, val, max, false)
+            print("x "..move[1].." y "..move[2].." eval "..eval[1])
             if(depth < eval[3]) then
                 depth = eval[3]
             end
@@ -60,11 +61,18 @@ function IA:mmab(board, depth, min, max, maximize)
     end
 end
 
-function IA:evaluate(board)
+function IA:evaluate(board, maximize)
     evaluation = 0
     moves = board:getEmpties()
+    if maximize then
+      color = "b"
+    else
+      color = "w"
+    end
     for _, move in pairs(moves) do
-      evaluation = evaluation + IA:evaluatePosition(move[1], move[2], "w", board)
+      val = IA:evaluatePosition(move[1], move[2], color, board)
+      openentVal = IA:evaluatePosition(move[1], move[2], "w", board)
+      evaluation = evaluation + val - openentVal
     end
     --print(evaluation)
     --print(rnd)
@@ -73,33 +81,45 @@ end
 
 function IA:evaluatePosition(x, y, color, board)
   evaluation = 0
+  if color == "w" then
+    oponentColor = "b"
+  else
+    oponentColor = "w"
+  end
   vertical = board:verticalOpenPaths(x, y, color)
   horizontal = board:horizontalOpenPaths(x, y, color)
   rightDiagonal = board:rightDiagonalOpenPaths(x, y, color)
   leftDiagonal = board:leftDiagonalOpenPaths(x, y, color)
-  if vertical[1] + vertical[3] > 4 then
-    evaluation = evaluation + (vertical[3](10^vertical[1]))
+  
+  --verticalOpenent = board:verticalOpenPaths(x, y, oponentColor)
+  --horizontalOpenent = board:horizontalOpenPaths(x, y, oponentColor)
+  --rightDiagonalOpenent = board:rightDiagonalOpenPaths(x, y, oponentColor)
+  --leftDiagonalOpenent = board:leftDiagonalOpenPaths(x, y, oponentColor)
+  --print("x "..x.." y "..y)
+  --print(vertical[1] + vertical[3] > 3)
+  if vertical[1] + vertical[3] > 3 then
+    evaluation = evaluation + (vertical[3]*(10^vertical[1]))
   end
-  if horizontal[1] + horizontal[3] > 4 then
-    evaluation = evaluation + (horizontal[3](10^horizontal[1]))
+  if horizontal[1] + horizontal[3] > 3 then
+    evaluation = evaluation + (horizontal[3]*(10^horizontal[1]))
   end
-  if rightDiagonal[1] + rightDiagonal[3] > 4 then
-    evaluation = evaluation + (rightDiagonal[3](10^rightDiagonal[1]))
+  if rightDiagonal[1] + rightDiagonal[3] > 3 then
+    evaluation = evaluation + (rightDiagonal[3]*(10^rightDiagonal[1]))
   end
-  if leftDiagonal[1] + leftDiagonal[3] > 4 then
-    evaluation = evaluation + (leftDiagonal[3](10^leftDiagonal[1]))
+  if leftDiagonal[1] + leftDiagonal[3] > 3 then
+    evaluation = evaluation + (leftDiagonal[3]*(10^leftDiagonal[1]))
   end
-  if vertical[2] + vertical[4] > 4 then
-    evaluation = evaluation + (vertical[4](10^vertical[2]))
+  if vertical[2] + vertical[4] > 3 then
+    evaluation = evaluation + (vertical[4]*(10^vertical[2]))
   end
-  if horizontal[2] + horizontal[4] > 4 then
-    evaluation = evaluation + (horizontal[4](10^horizontal[2]))
+  if horizontal[2] + horizontal[4] > 3 then
+    evaluation = evaluation + (horizontal[4]*(10^horizontal[2]))
   end
-  if rightDiagonal[2] + rightDiagonal[4] > 4 then
-    evaluation = evaluation + (rightDiagonal[4](10^rightDiagonal[2]))
+  if rightDiagonal[2] + rightDiagonal[4] > 3 then
+    evaluation = evaluation + (rightDiagonal[4]*(10^rightDiagonal[2]))
   end
-  if leftDiagonal[2] + leftDiagonal[4] > 4 then
-    evaluation = evaluation + (leftDiagonal[4](10^leftDiagonal[2]))
+  if leftDiagonal[2] + leftDiagonal[4] > 3 then
+    evaluation = evaluation + (leftDiagonal[4]*(10^leftDiagonal[2]))
   end
   return evaluation
 end
