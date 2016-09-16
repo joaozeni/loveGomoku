@@ -28,7 +28,8 @@ end
 function love.update(dt)
     if(ComputerTurn) then
         ComputerTurn = not ComputerTurn
-        local mmabResult = IA:mmab(Board, 0, -10000, 10000, true)
+        local mmabResult = IA:mmab(Board, 0, -100000000000, 1000000000000, true)
+	print "------------------------------------------------------------"
         --local mmabResult = mmab({PlayerPieces,ComputerPieces}, 0, -10000, 10000, true)
 	vx = (32*mmabResult[2][1] + BoardOffset - 12)
 	vy = (32*mmabResult[2][2] + BoardOffset - 12)

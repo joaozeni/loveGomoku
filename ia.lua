@@ -10,7 +10,7 @@ end
 function IA:mmab(board, depth, min, max, maximize)
     --print("min")
     --print(min)
-    if(board:won("w") or board:won("b") or depth > 0) then --Leaf
+    if(board:won("w") or board:won("b") or depth > 5) then --Leaf
         if(board:won("b") or board:won("w")) then
             --print("here ")
         end
@@ -21,9 +21,9 @@ function IA:mmab(board, depth, min, max, maximize)
         local val = min
         for _, move in pairs(moves) do
             --local eval = mmab(board, depth+1, move, val, max, false)
-	    --board:insert(move[1],move[2], "w")
+	    board:insert(move[1],move[2], "w")
             local eval = IA:mmab(board, depth+1, val, max, false)
-            print("x "..move[1].." y "..move[2].." eval "..eval[1])
+            print("max x "..move[1].." y "..move[2].." eval "..eval[1])
             if(depth < eval[3]) then
                 depth = eval[3]
             end
@@ -44,6 +44,7 @@ function IA:mmab(board, depth, min, max, maximize)
             --local eval = mmab(board, depth+1, move, min, val, true)
 	    board:insert(move[1],move[2], "b")
             local eval = IA:mmab(board, depth+1, min, val, true)
+            print("min x "..move[1].." y "..move[2].." eval "..eval[1])
             if(depth < eval[3]) then
                 depth = eval[3]
             end
@@ -73,8 +74,9 @@ function IA:evaluate(board, maximize)
     end
     for _, move in pairs(moves) do
       val = IA:evaluatePosition(move[1], move[2], color, board)
-      --openentVal = IA:evaluatePosition(move[1], move[2], openenteColor, board)
-      evaluation = evaluation + val
+      print("  x "..move[1].." y "..move[2].." eval "..val)
+      openentVal = IA:evaluatePosition(move[1], move[2], openenteColor, board)
+      evaluation = evaluation + val - openentVal
     end
     --print(evaluation)
     --print(rnd)
@@ -100,28 +102,28 @@ function IA:evaluatePosition(x, y, color, board)
   --print("x "..x.." y "..y.." opens "..horizontal[3].." n "..horizontal[1])
   --print(vertical[1] + vertical[3] > 3)
   if vertical[1] + vertical[3] > 3 then
-    evaluation = evaluation + (vertical[3]*(10^vertical[1]))
+    evaluation = evaluation + (vertical[3]*(10^(vertical[1]+vertical[3])))
   end
   if horizontal[1] + horizontal[3] > 3 then
-    evaluation = evaluation + (horizontal[3]*(10^horizontal[1]))
+    evaluation = evaluation + (horizontal[3]*(10^(horizontal[1]+horizontal[3])))
   end
   if rightDiagonal[1] + rightDiagonal[3] > 3 then
-    evaluation = evaluation + (rightDiagonal[3]*(10^rightDiagonal[1]))
+    evaluation = evaluation + (rightDiagonal[3]*(10^(rightDiagonal[1]+rightDiagonal[3])))
   end
   if leftDiagonal[1] + leftDiagonal[3] > 3 then
-    evaluation = evaluation + (leftDiagonal[3]*(10^leftDiagonal[1]))
+    evaluation = evaluation + (leftDiagonal[3]*(10^(leftDiagonal[1]+leftDiagonal[3])))
   end
   if vertical[2] + vertical[4] > 3 then
-    evaluation = evaluation + (vertical[4]*(10^vertical[2]))
+    evaluation = evaluation + (vertical[4]*(10^(vertical[2]+vertical[4])))
   end
   if horizontal[2] + horizontal[4] > 3 then
-    evaluation = evaluation + (horizontal[4]*(10^horizontal[2]))
+    evaluation = evaluation + (horizontal[4]*(10^(horizontal[2]+horizontal[4])))
   end
   if rightDiagonal[2] + rightDiagonal[4] > 3 then
-    evaluation = evaluation + (rightDiagonal[4]*(10^rightDiagonal[2]))
+    evaluation = evaluation + (rightDiagonal[4]*((10^rightDiagonal[2]+rightDiagonal[4])))
   end
   if leftDiagonal[2] + leftDiagonal[4] > 3 then
-    evaluation = evaluation + (leftDiagonal[4]*(10^leftDiagonal[2]))
+    evaluation = evaluation + (leftDiagonal[4]*(10^(leftDiagonal[2]+leftDiagonal[4])))
   end
   return evaluation
 end
