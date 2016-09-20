@@ -10,8 +10,9 @@ end
 function IA:mmab(board, depth, min, max, maximize)
     --print("min")
     --print(min)
-    if(board:won("w") or board:won("b") or depth > 5) then --Leaf
+    if(board:won("w") or board:won("b") or depth > 0) then --Leaf
         if(board:won("b") or board:won("w")) then
+	    return {IA:evaluateVictory(board, maximize), _, depth}
             --print("here ")
         end
         return {IA:evaluate(board, maximize), _, depth}
@@ -73,10 +74,12 @@ function IA:evaluate(board, maximize)
       openenteColor = "b"
     end
     for _, move in pairs(moves) do
+      print("--eval "..evaluation)
       val = IA:evaluatePosition(move[1], move[2], color, board)
-      print("  x "..move[1].." y "..move[2].." eval "..val)
-      openentVal = IA:evaluatePosition(move[1], move[2], openenteColor, board)
-      evaluation = evaluation + val - openentVal
+      oponentVal = IA:evaluatePosition(move[1], move[2], openenteColor, board)
+      tt = val - oponentVal
+      evaluation = evaluation + tt
+      print("  x "..move[1].." y "..move[2].." val "..val.." oval "..oponentVal.." eval "..evaluation.." tt "..tt)
     end
     --print(evaluation)
     --print(rnd)
@@ -85,20 +88,11 @@ end
 
 function IA:evaluatePosition(x, y, color, board)
   evaluation = 0
-  if color == "w" then
-    oponentColor = "b"
-  else
-    oponentColor = "w"
-  end
-  vertical = board:verticalOpenPaths(x, y, color)
-  horizontal = board:horizontalOpenPaths(x, y, color)
-  rightDiagonal = board:rightDiagonalOpenPaths(x, y, color)
-  leftDiagonal = board:leftDiagonalOpenPaths(x, y, color)
+  vertical = board:verticalPath(x, y, color)
+  horizontal = board:horizontalPath(x, y, color)
+  rightDiagonal = board:rightDiagonalPath(x, y, color)
+  leftDiagonal = board:leftDiagonalPath(x, y, color)
   
-  --verticalOpenent = board:verticalOpenPaths(x, y, oponentColor)
-  --horizontalOpenent = board:horizontalOpenPaths(x, y, oponentColor)
-  --rightDiagonalOpenent = board:rightDiagonalOpenPaths(x, y, oponentColor)
-  --leftDiagonalOpenent = board:leftDiagonalOpenPaths(x, y, oponentColor)
   --print("x "..x.." y "..y.." opens "..horizontal[3].." n "..horizontal[1])
   --print(vertical[1] + vertical[3] > 3)
   if vertical[1] + vertical[3] > 3 then
@@ -125,5 +119,12 @@ function IA:evaluatePosition(x, y, color, board)
   if leftDiagonal[2] + leftDiagonal[4] > 3 then
     evaluation = evaluation + (leftDiagonal[4]*(10^(leftDiagonal[2]+leftDiagonal[4])))
   end
+  return evaluation
+end
+
+function evaluateVictory(board, maximize)
+  evaluation = 0
+
+  pieces = board:getPieces()
   return evaluation
 end

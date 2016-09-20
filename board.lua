@@ -42,10 +42,10 @@ function Board:won(color)
     for i=0,14 do
       for j=0,14 do
 	if self.pieces[i][j] == color then
-	  neigV = Board:verticalOpenPaths(i,j)
-	  neigH = Board:horizontalOpenPaths(i,j)
-	  neigrD = Board:rightDiagonalOpenPaths(i,j)
-	  neiglD = Board:leftDiagonalOpenPaths(i,j)
+	  neigV = Board:verticalNeighbors(i,j)
+	  neigH = Board:horizontalNeighbors(i,j)
+	  neigrD = Board:rightDiagonalNeighbors(i,j)
+	  neiglD = Board:leftDiagonalNeighbors(i,j)
 	  neigVSize = (neigV[1] + neigV[2] == 4)
 	  neigHSize = (neigH[1] + neigH[2] == 4)
 	  neigrDSize = (neigrD[1] + neigrD[2] == 4)
@@ -59,22 +59,15 @@ function Board:won(color)
     return false
 end
 
-function Board:verticalOpenPaths(x, y, passedColor)
+function Board:verticalNeighbors(x, y)
     countUp = 0
     countDown = 0
-    countOpenUp = 0
-    countOpenDown = 0
-    if self.pieces[x][y] == 0 then
-      color = passedColor
-    else
-      color = self.pieces[x][y]
-    end
+    color = self.pieces[x][y]
+
     for i=1,4 do
       if y+i <= 14 then
 	if self.pieces[x][y+i] == color then
 	  countUp = countUp + 1
-	elseif self.pieces[x][y+i] == 0 then
-	  countOpenUp = countOpenUp + 1
 	else
 	  break
 	end
@@ -84,32 +77,23 @@ function Board:verticalOpenPaths(x, y, passedColor)
       if y+i >= 0 then
 	if self.pieces[x][y+i] == color then
 	  countDown = countDown + 1
-	elseif self.pieces[x][y+i] == 0 then
-	  countOpenDown = countOpenDown + 1
 	else
 	  break
 	end
       end
     end
-    return {countUp, countDown, countOpenUp, countOpenDown}
+    return {countUp, countDown}
 end
 
-function Board:horizontalOpenPaths(x, y, passedColor)
+function Board:horizontalNeighbors(x, y)
     countUp = 0
     countDown = 0
-    countOpenUp = 0
-    countOpenDown = 0
-    if self.pieces[x][y] == 0 then
-      color = passedColor
-    else
-      color = self.pieces[x][y]
-    end
+    color = self.pieces[x][y]
+
     for i=1,4 do
       if x+i <= 14 then
 	if self.pieces[x+i][y] == color then
 	  countUp = countUp + 1
-	elseif self.pieces[x+i][y] == 0 then
-	  countOpenUp = countOpenUp + 1
 	else
 	  break
 	end
@@ -119,32 +103,23 @@ function Board:horizontalOpenPaths(x, y, passedColor)
       if x+i >= 0 then
 	if self.pieces[x+i][y] == color then
 	  countDown = countDown + 1
-	elseif self.pieces[x+i][y] == 0 then
-	  countOpenDown = countOpenDown + 1
 	else
 	  break
 	end
       end
     end
-    return {countUp, countDown, countOpenUp, countOpenDown}
+    return {countUp, countDown}
 end
 
-function Board:leftDiagonalOpenPaths(x, y, passedColor)
+function Board:leftDiagonalNeighbors(x, y)
     countUp = 0
     countDown = 0
-    countOpenUp = 0
-    countOpenDown = 0
-    if self.pieces[x][y] == 0 then
-      color = passedColor
-    else
-      color = self.pieces[x][y]
-    end
+    color = self.pieces[x][y]
+
     for i=1,4 do
       if x+i <= 14 and y+i <= 14 then
 	if self.pieces[x+i][y+i] == color then
 	  countUp = countUp + 1
-	elseif self.pieces[x+i][y+i] == 0 then
-	  countOpenUp = countOpenUp + 1
 	else
 	  break
 	end
@@ -154,32 +129,23 @@ function Board:leftDiagonalOpenPaths(x, y, passedColor)
       if x+i >= 0 and y+i >= 0 then
 	if self.pieces[x+i][y+i] == color then
 	  countDown = countDown + 1
-	elseif self.pieces[x+i][y+i] == 0 then
-	  countOpenDown = countOpenDown + 1
 	else
 	  break
 	end
       end
     end
-    return {countUp, countDown, countOpenUp, countOpenDown}
+    return {countUp, countDown}
 end
 
-function Board:rightDiagonalOpenPaths(x, y, passedColor)
+function Board:rightDiagonalNeighbors(x, y)
     countUp = 0
     countDown = 0
-    countOpenUp = 0
-    countOpenDown = 0
-    if self.pieces[x][y] == 0 then
-      color = passedColor
-    else
-      color = self.pieces[x][y]
-    end
+    color = self.pieces[x][y]
+
     for i=1,4 do
       if x+i <= 14 and y-i <= 14 then
 	if self.pieces[x+i][y-i] == color then
 	  countUp = countUp + 1
-	elseif self.pieces[x+i][y-i] == 0 then
-	  countOpenUp = countOpenUp + 1
 	else
 	  break
 	end
@@ -189,14 +155,12 @@ function Board:rightDiagonalOpenPaths(x, y, passedColor)
       if x+i >= 0 and y-i >= 0 then
 	if self.pieces[x+i][y-i] == color then
 	  countDown = countDown + 1
-	elseif self.pieces[x+i][y-i] == 0 then
-	  countOpenDown = countOpenDown + 1
 	else
 	  break
 	end
       end
     end
-    return {countUp, countDown, countOpenUp, countOpenDown}
+    return {countUp, countDown}
 end
 
 function Board:getEmpties()
@@ -210,6 +174,21 @@ function Board:getEmpties()
     end
   end
   return empties
+end
+
+function Board:getPieces()
+  countBlack = 0
+  countWhite = 0
+  for i=0,14 do
+    for j=0,14 do
+      if self.pieces[i][j] == "w" then
+	countBlack = countBlack + 1
+      elseif self.pieces[i][j] == "b" then
+	countWhite = countWhite + 1
+      end
+    end
+  end
+  return {countBlack, countWhite}
 end
 
 function Board:getAroundBlanks(x,y)
@@ -240,4 +219,156 @@ function Board:getAroundBlanks(x,y)
     if self.pieces[x+1][y+1] == 0 then table.insert(blanks, {x+1,y+1}) end
   end
   return blanks
+end
+
+function Board:verticalPath(x, y, color)
+    countUp = 0
+    countDown = 0
+    color = self.pieces[x][y]
+
+    i = 1
+    flag = true
+    while flag  do
+      if y + i > 14 then
+	break
+      end
+      if self.pieces[x+i][y] == color then
+	countUp = countUp + 1
+      else
+	flag = false
+      end
+      i = i + 1
+    end
+
+    i = -1
+    flag = true
+    while flag do
+      if y + i < 0 then
+	break
+      end
+      if self.pieces[x][y+i] == color then
+	countDown = countDown + 1
+      else
+	flag = false
+      end
+      i = i - 1
+    end
+    
+    for i=1,4 do
+      if y+i <= 14 then
+	if self.pieces[x][y+i] == color then
+	  countUp = countUp + 1
+	else
+	  break
+	end
+      end
+    end
+    for i=-1,-4,-1 do
+      if y+i >= 0 then
+	if self.pieces[x][y+i] == color then
+	  countDown = countDown + 1
+	else
+	  break
+	end
+      end
+    end
+    return {countUp, countDown}
+end
+
+function Board:horizontalPath(x, y, color)
+    countUp = 0
+    countDown = 0
+    color = self.pieces[x][y]
+    
+    i = 1
+    flag = true
+    while flag  do
+      if x + i > 14 then
+	break
+      end
+      if self.pieces[x+i][y] == color then
+	countUp = countUp + 1
+      else
+	flag = false
+      end
+      i = i + 1
+    end
+
+    i = -1
+    flag = true
+    while flag do
+      if x + i < 0 then
+	break
+      end
+      if self.pieces[x+i][y] == color then
+	countDown = countDown + 1
+      else
+	flag = false
+      end
+      i = i - 1
+    end
+    
+    return {countUp, countDown}
+end
+
+function Board:leftDiagonalPath(x, y, color)
+    countUp = 0
+    countDown = 0
+    color = self.pieces[x][y]
+
+    i = 1
+    flag = true
+    while flag  do
+      if x + i > 14 and y+i > 14 then
+	break
+      end
+      if self.pieces[x+i][y+i] == color then
+	countUp = countUp + 1
+      else
+	flag = false
+      end
+      i = i + 1
+    end
+
+    i = -1
+    flag = true
+    while flag do
+      if x+i < 0 and y+i < 0 then
+	break
+      end
+      if self.pieces[x+i][y+i] == color then
+	countDown = countDown + 1
+      else
+	flag = false
+      end
+      i = i - 1
+    end
+    
+    return {countUp, countDown}
+end
+
+function Board:rightDiagonalPath(x, y, color)
+    countUp = 0
+    countDown = 0
+    color = self.pieces[x][y]
+
+    for i=1,4 do
+      if x+i <= 14 and y-i <= 14 then
+	if self.pieces[x+i][y-i] == color then
+	  countUp = countUp + 1
+	else
+	  break
+	end
+      end
+    end
+    for i=-1,-4,-1 do
+      if x+i >= 0 and y-i >= 0 then
+	if self.pieces[x+i][y-i] == color then
+	  countDown = countDown + 1
+	else
+	  break
+	end
+      end
+    end
+    return {countUp, countDown}
 end
