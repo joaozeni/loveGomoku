@@ -10,8 +10,10 @@ end
 function IA:mmab(board, depth, min, max, maximize)
     --print("min")
     --print(min)
-    if(board:won("w") or board:won("b") or depth > 0) then --Leaf
-        if(board:won("b") or board:won("w")) then
+    if(board:won("w") or board:won("b") or depth > 6) then --Leaf
+        if board:won("b") then
+	    return {-IA:evaluateVictory(board, maximize), _, depth}
+	elseif board:won("w") then
 	    return {IA:evaluateVictory(board, maximize), _, depth}
             --print("here ")
         end
@@ -87,44 +89,29 @@ function IA:evaluate(board, maximize)
 end
 
 function IA:evaluatePosition(x, y, color, board)
-  evaluation = 0
+  evaluationP = 0
   vertical = board:verticalPath(x, y, color)
   horizontal = board:horizontalPath(x, y, color)
   rightDiagonal = board:rightDiagonalPath(x, y, color)
   leftDiagonal = board:leftDiagonalPath(x, y, color)
+
+  verticalVal = vertical[1] + vertical[2]
+  horizontalVal = horizontal[1] + horizontal[2]
+  rightDiagonalVal = rightDiagonal[1] + rightDiagonal[2]
+  leftDiagonalVal = leftDiagonal[1] + leftDiagonal[2]
+  
+  evaluationP = 2^(verticalVal + horizontalVal + rightDiagonalVal + leftDiagonalVal)
   
   --print("x "..x.." y "..y.." opens "..horizontal[3].." n "..horizontal[1])
-  --print(vertical[1] + vertical[3] > 3)
-  if vertical[1] + vertical[3] > 3 then
-    evaluation = evaluation + (vertical[3]*(10^(vertical[1]+vertical[3])))
-  end
-  if horizontal[1] + horizontal[3] > 3 then
-    evaluation = evaluation + (horizontal[3]*(10^(horizontal[1]+horizontal[3])))
-  end
-  if rightDiagonal[1] + rightDiagonal[3] > 3 then
-    evaluation = evaluation + (rightDiagonal[3]*(10^(rightDiagonal[1]+rightDiagonal[3])))
-  end
-  if leftDiagonal[1] + leftDiagonal[3] > 3 then
-    evaluation = evaluation + (leftDiagonal[3]*(10^(leftDiagonal[1]+leftDiagonal[3])))
-  end
-  if vertical[2] + vertical[4] > 3 then
-    evaluation = evaluation + (vertical[4]*(10^(vertical[2]+vertical[4])))
-  end
-  if horizontal[2] + horizontal[4] > 3 then
-    evaluation = evaluation + (horizontal[4]*(10^(horizontal[2]+horizontal[4])))
-  end
-  if rightDiagonal[2] + rightDiagonal[4] > 3 then
-    evaluation = evaluation + (rightDiagonal[4]*((10^rightDiagonal[2]+rightDiagonal[4])))
-  end
-  if leftDiagonal[2] + leftDiagonal[4] > 3 then
-    evaluation = evaluation + (leftDiagonal[4]*(10^(leftDiagonal[2]+leftDiagonal[4])))
-  end
-  return evaluation
+  --print(vertical[3])
+  return evaluationP
 end
 
-function evaluateVictory(board, maximize)
+function IA:evaluateVictory(board)
   evaluation = 0
 
   pieces = board:getPieces()
+  evaluation = 10^(pieces[1]+pieces[2])
+
   return evaluation
 end

@@ -224,16 +224,21 @@ end
 function Board:verticalPath(x, y, color)
     countUp = 0
     countDown = 0
-    color = self.pieces[x][y]
+    openUp = false
+    openDown = false
 
     i = 1
     flag = true
-    while flag  do
-      if y + i > 14 then
+    while flag do
+      if y+i > 14 then
 	break
       end
-      if self.pieces[x+i][y] == color then
+      p = self.pieces[x][y+i]
+      if p == color then
 	countUp = countUp + 1
+      elseif p == 0 then
+	openUp = true
+	flag = false
       else
 	flag = false
       end
@@ -243,51 +248,42 @@ function Board:verticalPath(x, y, color)
     i = -1
     flag = true
     while flag do
-      if y + i < 0 then
+      if y+i < 0 then
 	break
       end
-      if self.pieces[x][y+i] == color then
+      p = self.pieces[x][y+i]
+      if p == color then
 	countDown = countDown + 1
+      elseif p == 0 then
+	openDown = true
+	flag = false
       else
 	flag = false
       end
       i = i - 1
     end
     
-    for i=1,4 do
-      if y+i <= 14 then
-	if self.pieces[x][y+i] == color then
-	  countUp = countUp + 1
-	else
-	  break
-	end
-      end
-    end
-    for i=-1,-4,-1 do
-      if y+i >= 0 then
-	if self.pieces[x][y+i] == color then
-	  countDown = countDown + 1
-	else
-	  break
-	end
-      end
-    end
-    return {countUp, countDown}
+    return {countUp, countDown, openUp, openDown}
 end
 
 function Board:horizontalPath(x, y, color)
     countUp = 0
     countDown = 0
-    color = self.pieces[x][y]
+    openUp = false
+    openDown = false
     
     i = 1
     flag = true
-    while flag  do
-      if x + i > 14 then
+    while flag do
+      if x+i > 14 then
 	break
       end
-      if self.pieces[x+i][y] == color then
+      p = self.pieces[x+i][y]
+      if p == color then
 	countUp = countUp + 1
+      elseif p == 0 then
+	openUp = true
+	flag = false
       else
 	flag = false
       end
@@ -297,33 +293,42 @@ function Board:horizontalPath(x, y, color)
     i = -1
     flag = true
     while flag do
-      if x + i < 0 then
+      if x+i < 0 then
 	break
       end
-      if self.pieces[x+i][y] == color then
+      p = self.pieces[x+i][y]
+      if p == color then
 	countDown = countDown + 1
+      elseif p == 0 then
+	openDown = true
+	flag = false
       else
 	flag = false
       end
       i = i - 1
     end
     
-    return {countUp, countDown}
+    return {countUp, countDown, openUp, openDown}
 end
 
 function Board:leftDiagonalPath(x, y, color)
     countUp = 0
     countDown = 0
-    color = self.pieces[x][y]
+    openUp = false
+    openDown = false
 
     i = 1
     flag = true
-    while flag  do
-      if x + i > 14 and y+i > 14 then
+    while flag do
+      if x+i > 14 or y+i > 14 then
 	break
       end
-      if self.pieces[x+i][y+i] == color then
+      p = self.pieces[x+i][y+i]
+      if p == color then
 	countUp = countUp + 1
+      elseif p == 0 then
+	openUp = true
+	flag = false
       else
 	flag = false
       end
@@ -333,42 +338,65 @@ function Board:leftDiagonalPath(x, y, color)
     i = -1
     flag = true
     while flag do
-      if x+i < 0 and y+i < 0 then
+      if x+i < 0 or y+i < 0 then
 	break
       end
-      if self.pieces[x+i][y+i] == color then
+      p = self.pieces[x+i][y+i]
+      if p == color then
 	countDown = countDown + 1
+      elseif p == 0 then
+	openDown = true
+	flag = false
       else
 	flag = false
       end
       i = i - 1
     end
     
-    return {countUp, countDown}
+    return {countUp, countDown, openUp, openDown}
 end
 
 function Board:rightDiagonalPath(x, y, color)
     countUp = 0
     countDown = 0
-    color = self.pieces[x][y]
+    openUp = false
+    openDown = false
 
-    for i=1,4 do
-      if x+i <= 14 and y-i <= 14 then
-	if self.pieces[x+i][y-i] == color then
-	  countUp = countUp + 1
-	else
-	  break
-	end
+    i = 1
+    flag = true
+    while flag do
+      if x+i > 14 or y-i < 0 then
+	break
       end
-    end
-    for i=-1,-4,-1 do
-      if x+i >= 0 and y-i >= 0 then
-	if self.pieces[x+i][y-i] == color then
-	  countDown = countDown + 1
-	else
-	  break
-	end
+      p = self.pieces[x+i][y-i]
+      if p == color then
+	countUp = countUp + 1
+      elseif p == 0 then
+	openUp = true
+	flag = false
+      else
+	flag = false
       end
+      i = i + 1
     end
-    return {countUp, countDown}
+
+    i = -1
+    flag = true
+    while flag do
+      if x+i < 0 or y-i > 14 then
+	break
+      end
+      p = self.pieces[x+i][y-i]
+      if p == color then
+	countDown = countDown + 1
+      elseif p == 0 then
+	openDown = true
+	flag = false
+      else
+	flag = false
+      end
+      i = i - 1
+    end
+    
+    return {countUp, countDown, openUp, openDown}
 end
