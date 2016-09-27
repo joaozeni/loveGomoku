@@ -17,6 +17,10 @@ function love.load()
     --Data Structs that will be used
     Board = Board:new()
     DrawPieces = {}
+
+    --For menu
+    PlayerPiece = "b"
+    ComputerPiece = "w"
     
     TestMessage = "Nothing till now"
     TileOffset = 32
@@ -33,7 +37,7 @@ function love.update(dt)
         --local mmabResult = mmab({PlayerPieces,ComputerPieces}, 0, -10000, 10000, true)
 	vx = (32*mmabResult[2][1] + BoardOffset - 12)
 	vy = (32*mmabResult[2][2] + BoardOffset - 12)
-	Board:insert(mmabResult[2][1],mmabResult[2][2],"w")
+	Board:insert(mmabResult[2][1],mmabResult[2][2], ComputerPiece)
 	table.insert(DrawPieces, {WhitePiece, vx, vy})
 	--Pieces[x][y] = {WhitePiece, mmabResult[2][2], mmabResult[2][3]}
         --table.insert(ComputerPieces, {WhitePiece, mmabResult[2][2], mmabResult[2][3]})
@@ -60,15 +64,17 @@ function love.mousepressed(x,y,btn)
 	    x = (localPiece[2] - BoardOffset + 12)/32
 	    y = (localPiece[3] - BoardOffset + 12)/32
             if(not Board:positionTaken(x,y)) then
-	        Board:insert(x,y,"b")
+	        Board:insert(x,y,PlayerPiece)
 		table.insert(DrawPieces, localPiece)
                 --PlayerTurn = not PlayerTurn
 	        --x = (localPiece[2] - BoardOffset + 12)/32
 	        --y = (localPiece[3] - BoardOffset + 12)/32
 		--Pieces[x][y] = localPiece
                 --table.insert(PlayerPieces, localPiece)
-                if(Board:won("b")) then
+                if(Board:won(PlayerPiece)) then
                     print("player won")
+		elseif(Board:won(ComputerPiece)) then
+                    print("Computer won")
                 else
                     ComputerTurn = true
                 end

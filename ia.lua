@@ -10,10 +10,10 @@ end
 function IA:mmab(board, depth, min, max, maximize)
     --print("min")
     --print(min)
-    if(board:won("w") or board:won("b") or depth > 6) then --Leaf
-        if board:won("b") then
+    if(board:won(ComputerPiece) or board:won(PlayerPiece) or depth > 6) then --Leaf
+        if board:won(PlayerPiece) then
 	    return {-IA:evaluateVictory(board, maximize), _, depth}
-	elseif board:won("w") then
+	elseif board:won(ComputerPiece) then
 	    return {IA:evaluateVictory(board, maximize), _, depth}
             --print("here ")
         end
@@ -24,7 +24,7 @@ function IA:mmab(board, depth, min, max, maximize)
         local val = min
         for _, move in pairs(moves) do
             --local eval = mmab(board, depth+1, move, val, max, false)
-	    board:insert(move[1],move[2], "w")
+	    board:insert(move[1],move[2], ComputerPiece)
             local eval = IA:mmab(board, depth+1, val, max, false)
             print("max x "..move[1].." y "..move[2].." eval "..eval[1])
             if(depth < eval[3]) then
@@ -45,7 +45,7 @@ function IA:mmab(board, depth, min, max, maximize)
         local val = max
         for _, move in pairs(moves) do
             --local eval = mmab(board, depth+1, move, min, val, true)
-	    board:insert(move[1],move[2], "b")
+	    board:insert(move[1],move[2], PlayerPiece)
             local eval = IA:mmab(board, depth+1, min, val, true)
             print("min x "..move[1].." y "..move[2].." eval "..eval[1])
             if(depth < eval[3]) then
@@ -73,7 +73,7 @@ function IA:evaluate(board, maximize)
       openenteColor = "w"
     else
       color = "w"
-      openenteColor = "b"
+      openenteColor = PlayerPiece
     end
     for _, move in pairs(moves) do
       print("--eval "..evaluation)
